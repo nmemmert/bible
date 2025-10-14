@@ -1,0 +1,39 @@
+services:
+  bible-study-hub:
+    # Build from local Dockerfile - USE THIS for third-party systems with registry restrictions
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: bible-study-hub:local
+    container_name: bible-study-hub
+    ports:
+      - "5000:5000"
+    volumes:
+      # Persist the Bible JSON files
+      - ./bibles/json-bibles:/usr/src/app/bibles/json-bibles
+      # Persist the SQLite database
+      - ./bible_study.db:/usr/src/app/bible_study.db
+      # Optional: Mount ESV API key if you have one
+      - ./esv-api-key.txt:/usr/src/app/esv-api-key.txt
+    environment:
+      # Flask environment variables
+      - FLASK_APP=main.py
+      - FLASK_ENV=production
+      # Optional: Set secret key for sessions
+      - SECRET_KEY=${SECRET_KEY:-your-secret-key-change-this}
+      # Database URL (SQLite by default)
+      - DATABASE_URL=sqlite:///bible_study.db
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "-", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    labels:
+      - "com.bible-study-hub.description=Bible Study Hub - Multi-version Bible reader with study tools"
+      - "com.bible-study-hub.version=dark-theme"
+
+networks:
+  default:
+    name: bible-study-network

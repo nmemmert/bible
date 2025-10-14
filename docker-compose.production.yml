@@ -1,0 +1,62 @@
+services:
+  # Main Bible Study Hub application
+  bible-study-hub:
+    image: ghcr.io/nmemmert/bible:latest
+    container_name: bible-study-hub
+    ports:
+      - "5000:5000"
+    volumes:
+      # Persist the Bible JSON files
+      - bible-json-data:/usr/src/app/bibles/json-bibles
+      # Persist the SQLite database
+      - bible-db-data:/usr/src/app
+      # Optional: Mount ESV API key if you have one
+      - ./esv-api-key.txt:/usr/src/app/esv-api-key.txt:ro
+    environment:
+      # Flask environment variables
+      - FLASK_APP=main.py
+      - FLASK_ENV=production
+      # Secret key for sessions (CHANGE THIS!)
+      - SECRET_KEY=${SECRET_KEY:-please-change-this-secret-key-in-production}
+      # Database URL
+      - DATABASE_URL=sqlite:///bible_study.db
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "-", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - bible-network
+    labels:
+      - "com.bible-study-hub.description=Bible Study Hub - Multi-version Bible reader with study tools"
+      - "com.bible-study-hub.version=dark-theme"
+
+  # Optional: Nginx reverse proxy for HTTPS and caching
+  # Uncomment this section if you want to use Nginx
+  # nginx:
+  #   image: nginx:alpine
+  #   container_name: bible-nginx
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #   volumes:
+  #     - ./nginx.conf:/etc/nginx/nginx.conf:ro
+  #     - ./ssl:/etc/nginx/ssl:ro
+  #   depends_on:
+  #     - bible-study-hub
+  #   restart: unless-stopped
+  #   networks:
+  #     - bible-network
+
+volumes:
+  # Named volumes for data persistence
+  bible-json-data:
+    driver: local
+  bible-db-data:
+    driver: local
+
+networks:
+  bible-network:
+    driver: bridge
