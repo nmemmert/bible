@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h3 class="mb-0">➕ Add Section to "{{ guide.title }}"</h3>
+                        <a href="{{ url_for('study.view_study_guide', guide_id=guide.id) }}" class="btn btn-outline-secondary">
+                            ← Back to Study Guide
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <form method="POST" id="sectionForm">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="form-group mb-3">
+                            {{ form.title.label(class="form-label") }}
+                            {{ form.title(class="form-control", placeholder="e.g., Introduction, Key Passage, Discussion Questions") }}
+                            {% for error in form.title.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            {{ form.section_type.label(class="form-label") }}
+                            {{ form.section_type(class="form-select", id="sectionType") }}
+                            {% for error in form.section_type.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                            <small class="form-text text-muted">Choose the type of content for this section</small>
+                        </div>
+                        
+                        <!-- Bible Passage Fields (shown when passage type selected) -->
+                        <div id="passageFields" class="mb-3" style="display: none;">
+                            <div class="card bg-light">
+                                <div class="card-header">
+                                    <h6 class="mb-0">📖 Bible Passage Reference</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            {{ form.book.label(class="form-label") }}
+                                            {{ form.book(class="form-control", placeholder="e.g., Matthew, Genesis, Psalms") }}
+                                            {% for error in form.book.errors %}
+                                                <div class="text-danger small">{{ error }}</div>
+                                            {% endfor %}
+                                        </div>
+                                        <div class="col-md-6">
+                                            {{ form.chapter.label(class="form-label") }}
+                                            {{ form.chapter(class="form-control", placeholder="e.g., 5") }}
+                                            {% for error in form.chapter.errors %}
+                                                <div class="text-danger small">{{ error }}</div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                    <div class="row mt-3">
+                                        <div class="col-md-6">
+                                            {{ form.verse_start.label(class="form-label") }}
+                                            {{ form.verse_start(class="form-control", placeholder="Optional - starting verse") }}
+                                            {% for error in form.verse_start.errors %}
+                                                <div class="text-danger small">{{ error }}</div>
+                                            {% endfor %}
+                                        </div>
+                                        <div class="col-md-6">
+                                            {{ form.verse_end.label(class="form-label") }}
+                                            {{ form.verse_end(class="form-control", placeholder="Optional - ending verse") }}
+                                            {% for error in form.verse_end.errors %}
+                                                <div class="text-danger small">{{ error }}</div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                    <small class="form-text text-muted mt-2">
+                                        Fill in the Bible reference for this section. Verses are optional - leave blank for entire chapter.
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group mb-4">
+                            {{ form.content.label(class="form-label") }}
+                            {{ form.content(class="form-control", placeholder=getPlaceholderText()) }}
+                            {% for error in form.content.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                            <small class="form-text text-muted" id="contentHelp">
+                                Add your content based on the section type selected above.
+                            </small>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ url_for('study.view_study_guide', guide_id=guide.id) }}" class="btn btn-secondary">Cancel</a>
+                            {{ form.submit(class="btn btn-primary") }}
+                        </div>
+                    </form>
+                    
+                    <hr class="my-4">
+                    
+                    <!-- Section Type Help -->
+                    <div class="section-help">
+                        <h6>Section Type Guide:</h6>
+                        <div class="row">
+                            <div class="col-md-6 mb-2">
+                                <strong>📋 Text/Commentary:</strong><br>
+                                <small class="text-muted">General study content, explanations, or commentary</small>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <strong>📄 Bible Passage:</strong><br>
+                                <small class="text-muted">Reference specific Bible verses with commentary</small>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <strong>❓ Study Question:</strong><br>
+                                <small class="text-muted">Discussion or reflection questions for study</small>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <strong>📝 Personal Notes Space:</strong><br>
+                                <small class="text-muted">Area for users to add their own notes during study</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Dynamic form behavior based on section type
+document.addEventListener('DOMContentLoaded', function() {
+    const sectionTypeSelect = document.getElementById('sectionType');
+    const passageFields = document.getElementById('passageFields');
+    const contentTextarea = document.querySelector('textarea[name="content"]');
+    const contentHelp = document.getElementById('contentHelp');
+    
+    function updateFormByType() {
+        const selectedType = sectionTypeSelect.value;
+        
+        // Show/hide passage fields
+        if (selectedType === 'passage') {
+            passageFields.style.display = 'block';
+        } else {
+            passageFields.style.display = 'none';
+        }
+        
+        // Update placeholder and help text
+        switch(selectedType) {
+            case 'text':
+                contentTextarea.placeholder = 'Enter your commentary, explanation, or study content here...';
+                contentHelp.textContent = 'Add general study content, explanations, or commentary for this section.';
+                break;
+            case 'passage':
+                contentTextarea.placeholder = 'Add your commentary on this Bible passage, key insights, or discussion points...';
+                contentHelp.textContent = 'Provide commentary, insights, or discussion points about the Bible passage referenced above.';
+                break;
+            case 'question':
+                contentTextarea.placeholder = 'Write your study or discussion question here...';
+                contentHelp.textContent = 'Create thought-provoking questions for study and reflection.';
+                break;
+            case 'notes':
+                contentTextarea.placeholder = 'Provide instructions or prompts for personal note-taking...';
+                contentHelp.textContent = 'This creates a space where users can add their own notes during study.';
+                break;
+        }
+    }
+    
+    // Update on page load
+    updateFormByType();
+    
+    // Update when selection changes
+    sectionTypeSelect.addEventListener('change', updateFormByType);
+});
+
+// Helper function for placeholder text (called from template)
+function getPlaceholderText() {
+    return 'Content will be updated based on section type selection...';
+}
+</script>
+{% endblock %}

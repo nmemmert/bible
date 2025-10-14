@@ -32,9 +32,9 @@ class ChapterReader {
     }
 
     setupElements() {
-        this.bookSelect = document.querySelector('.book-select') || document.querySelector('#book');
-        this.chapterSelect = document.querySelector('.chapter-select') || document.querySelector('#chapter');
-        this.versionSelect = document.querySelector('.version-select') || document.querySelector('#select_version');
+        this.bookSelect = document.querySelector('#book');
+        this.chapterSelect = document.querySelector('#chapter');
+        this.versionSelect = document.querySelector('#select_version');
         this.prevButtons = document.querySelectorAll('.prev-btn, .footer-btn.prev');
         this.nextButtons = document.querySelectorAll('.next-btn, .footer-btn.next');
     }
@@ -189,22 +189,13 @@ class ChapterReader {
         // Smooth scroll for anchor links
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
-                // If href is exactly '#' or empty, ignore — these are placeholders
-                const href = this.getAttribute('href');
-                if (!href || href === '#') return;
-
                 e.preventDefault();
-                try {
-                    const target = document.querySelector(href);
-                    if (target) {
-                        target.scrollIntoView({
-                            behavior: 'smooth',
-                            block: 'start'
-                        });
-                    }
-                } catch (err) {
-                    // Invalid selector (defensive) — ignore
-                    console.warn('Smooth scroll: invalid selector', href, err);
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
                 }
             });
         });
@@ -307,7 +298,7 @@ class ChapterReader {
 
 // Additional CSS for enhanced features
 const additionalCSS = `
-    .nav-feedback {
+.nav-feedback {
     position: fixed;
     top: 50%;
     font-size: 3rem;
@@ -342,7 +333,7 @@ const additionalCSS = `
     left: 0;
     width: 100%;
     height: 3px;
-    background: rgba(102, 126, 234, 0.2);
+    background: color-mix(in srgb, var(--primary-accent) 20%, transparent 80%);
     z-index: 1000;
 }
 

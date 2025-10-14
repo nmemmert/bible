@@ -1,20 +1,344 @@
 {% extends "base.html" %}
 {% import "form_make.html" as wtf %}
 
+{% block body_attrs %}data-book="{{ book }}" data-chapter="{{ chapter }}"{% endblock %}
+
 {% block title %}{{ title }}{% endblock %}
 {% block content %}
-    <div class="container-fluid mw-100" style="max-width: 700px">
-        <script>var book = "{{ book }}";var chapterNumber = {{ chapter }};</script>
-        <form method="POST" role="presentation">
-            {{ form.hidden_tag() }}
-            {{ wtf.form_field(version_select.select_version, size=6) }}
-            <br>
-            {{ wtf.form_field(form.book) }}
-            {{ wtf.form_field(form.chapter) }}
-            {{ wtf.form_field(form.submit) }}
-            {% if error_mess %}
-                {{ error_mess }}
+    <div class="container mt-4">
+        {% if current_user.is_authenticated %}
+        <!-- Welcome Back Section -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="welcome-banner">
+                    <h2>Welcome back, {{ current_user.username }}! 👋</h2>
+                    <p class="text-muted">Continue your Bible study journey</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Study Dashboard -->
+        <div class="row mb-4">
+            <div class="col-lg-8 col-md-12 mb-3">
+                <!-- Bible Selection Form -->
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h5 class="mb-0">📖 Continue Reading</h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="POST" role="presentation">
+                            {{ form.hidden_tag() }}
+                            {{ wtf.form_field(version_select.select_version, size=6) }}
+                            <br>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    {{ wtf.form_field(form.book) }}
+                                </div>
+                                <div class="col-md-6">
+                                    {{ wtf.form_field(form.chapter) }}
+                                </div>
+                            </div>
+                            {{ wtf.form_field(form.submit) }}
+                            {% if error_mess %}
+                                <div class="alert alert-warning mt-2">{{ error_mess }}</div>
+                            {% endif %}
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-12 mb-3">
+                <!-- Study Stats -->
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h6 class="mb-0">📊 Your Study Progress</h6>
+                    </div>
+                    <div class="card-body">
+                        {% if user_data.stats %}
+                            <div class="stat-item">
+                                <span class="stat-number">{{ user_data.stats.notes }}</span>
+                                <span class="stat-label">Notes</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-number">{{ user_data.stats.bookmarks }}</span>
+                                <span class="stat-label">Bookmarks</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-number">{{ user_data.stats.study_guides }}</span>
+                                <span class="stat-label">Study Guides</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-number">{{ user_data.stats.highlights }}</span>
+                                <span class="stat-label">Highlights</span>
+                            </div>
+                        {% else %}
+                            <div class="text-center text-muted">
+                                <p>Start your study journey!</p>
+                                <small>Create notes, bookmarks, and study guides as you read.</small>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Recent Activity -->
+        <div class="row mb-4">
+            {% if user_data.recent_bookmarks %}
+            <div class="col-lg-6 col-md-12 mb-3">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h6 class="mb-0">🔖 Recent Bookmarks</h6>
+                    </div>
+                    <div class="card-body">
+                        {% for bookmark in user_data.recent_bookmarks %}
+                        <div class="recent-item">
+                            <a href="{{ url_for('chapter') }}?book={{ bookmark.book }}&chapter={{ bookmark.chapter }}">
+                                <strong>{{ bookmark.book }} {{ bookmark.chapter }}{% if bookmark.verse %}:{{ bookmark.verse }}{% endif %}</strong>
+                                {% if bookmark.title %}<br><small class="text-muted">{{ bookmark.title }}</small>{% endif %}
+                            </a>
+                        </div>
+                        {% endfor %}
+                        <a href="{{ url_for('study.bookmarks') }}" class="btn btn-sm btn-outline-primary mt-2">View All</a>
+                    </div>
+                </div>
+            </div>
             {% endif %}
-        </form>
+            
+            {% if user_data.recent_notes %}
+            <div class="col-lg-6 col-md-12 mb-3">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h6 class="mb-0">📝 Recent Notes</h6>
+                    </div>
+                    <div class="card-body">
+                        {% for note in user_data.recent_notes %}
+                        <div class="recent-item">
+                            <strong>{{ note.book }} {{ note.chapter }}{% if note.verse %}:{{ note.verse }}{% endif %}</strong>
+                            <p class="small text-muted mb-1">{{ note.content[:100] }}{% if note.content|length > 100 %}...{% endif %}</p>
+                        </div>
+                        {% endfor %}
+                        <a href="{{ url_for('study.notes') }}" class="btn btn-sm btn-outline-primary mt-2">View All</a>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Quick Actions Row -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="mb-0">🚀 Quick Actions</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center g-3">
+                            <div class="col-lg-3 col-md-6 col-sm-6 col-12">
+                                <a href="{{ url_for('study.add_note') }}" class="btn btn-outline-primary w-100 quick-action-btn" style="padding: 15px;">
+                                    <i class="fas fa-plus-circle d-block mb-2"></i>
+                                    <span>Add Note</span>
+                                </a>
+                            </div>
+                            <div class="col-lg-3 col-md-6 col-sm-6 col-12">
+                                <a href="{{ url_for('study.create_study_guide') }}" class="btn btn-outline-success w-100 quick-action-btn" style="padding: 15px;">
+                                    <i class="fas fa-book-open d-block mb-2"></i>
+                                    <span>New Study Guide</span>
+                                </a>
+                            </div>
+                            <div class="col-lg-3 col-md-6 col-sm-6 col-12">
+                                <a href="{{ url_for('search') }}" class="btn btn-outline-info w-100 quick-action-btn" style="padding: 15px;">
+                                    <i class="fas fa-search d-block mb-2"></i>
+                                    <span>Search Scripture</span>
+                                </a>
+                            </div>
+                            <div class="col-lg-3 col-md-6 col-sm-6 col-12">
+                                <a href="{{ url_for('study.word_studies') }}" class="btn btn-outline-warning w-100 quick-action-btn" style="padding: 15px;">
+                                    <i class="fas fa-language d-block mb-2"></i>
+                                    <span>Word Studies</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        {% else %}
+        <!-- Non-authenticated user experience - Landing Page -->
+        
+        <!-- Hero Section -->
+        <div class="hero-section text-center py-5 mb-5">
+            <div class="container">
+                <h1 class="display-4 mb-4">📖 Bible Study Hub</h1>
+                <p class="lead mb-4">Transform your Bible study with powerful tools for reading, searching, and note-taking</p>
+                <div class="hero-actions">
+                    <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg me-3">Start Free Account</a>
+                    <a href="{{ url_for('auth.login') }}" class="btn btn-outline-light btn-lg">Sign In</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Bible Reader for Guests -->
+        <div class="row mb-5">
+            <div class="col-lg-8 mx-auto">
+                <div class="card">
+                    <div class="card-header text-center">
+                        <h4 class="mb-0">📖 Try Our Bible Reader</h4>
+                        <small class="text-muted">No account required</small>
+                    </div>
+                    <div class="card-body">
+                        <form method="POST" role="presentation">
+                            {{ form.hidden_tag() }}
+                            <div class="row mb-3">
+                                <div class="col-md-12">
+                                    {{ wtf.form_field(version_select.select_version, size=6) }}
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    {{ wtf.form_field(form.book) }}
+                                </div>
+                                <div class="col-md-6">
+                                    {{ wtf.form_field(form.chapter) }}
+                                </div>
+                            </div>
+                            <div class="text-center mt-3">
+                                {{ wtf.form_field(form.submit) }}
+                            </div>
+                            {% if error_mess %}
+                                <div class="alert alert-warning mt-2">{{ error_mess }}</div>
+                            {% endif %}
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- About Section -->
+        <section id="about" class="mb-5">
+            <div class="row">
+                <div class="col-lg-10 mx-auto">
+                    <div class="text-center mb-4">
+                        <h2>✨ About Bible Study Hub</h2>
+                        <p class="lead">Designed by students, for students of God's Word</p>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <div class="feature-box">
+                                <div class="feature-icon">📚</div>
+                                <h5>Multiple Translations</h5>
+                                <p>Access 25+ Bible translations including ESV, NIV, NASB, KJV, and more. Compare verses side-by-side to deepen your understanding.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <div class="feature-box">
+                                <div class="feature-icon">🔍</div>
+                                <h5>Powerful Search</h5>
+                                <p>Find any verse instantly with our advanced search. Search by keywords, phrases, or references across all translations.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section id="features" class="mb-5">
+            <div class="row">
+                <div class="col-lg-10 mx-auto">
+                    <div class="text-center mb-4">
+                        <h2>🚀 Enhanced Study Features</h2>
+                        <p class="text-muted">Unlock these powerful tools with a free account</p>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-lg-4 col-md-6 mb-4">
+                            <div class="card feature-card h-100">
+                                <div class="card-body text-center">
+                                    <div class="feature-icon-large">📝</div>
+                                    <h5 class="card-title">Smart Notes</h5>
+                                    <p class="card-text">Take detailed notes on any verse or passage. Organize your insights and track your spiritual growth.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-6 mb-4">
+                            <div class="card feature-card h-100">
+                                <div class="card-body text-center">
+                                    <div class="feature-icon-large">🔖</div>
+                                    <h5 class="card-title">Bookmarks</h5>
+                                    <p class="card-text">Save your favorite verses and passages. Create collections for different topics or studies.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-6 mb-4">
+                            <div class="card feature-card h-100">
+                                <div class="card-body text-center">
+                                    <div class="feature-icon-large">📖</div>
+                                    <h5 class="card-title">Study Guides</h5>
+                                    <p class="card-text">Create and follow structured study plans. Perfect for personal devotions or group studies.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-6 mb-4">
+                            <div class="card feature-card h-100">
+                                <div class="card-body text-center">
+                                    <div class="feature-icon-large">🔤</div>
+                                    <h5 class="card-title">Word Studies</h5>
+                                    <p class="card-text">Dive deep into original Hebrew and Greek words. Understand the rich meaning behind the text.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-6 mb-4">
+                            <div class="card feature-card h-100">
+                                <div class="card-body text-center">
+                                    <div class="feature-icon-large">📊</div>
+                                    <h5 class="card-title">Bible Overview</h5>
+                                    <p class="card-text">Visual comparison of multiple translations in a convenient grid layout for comprehensive study.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-6 mb-4">
+                            <div class="card feature-card h-100">
+                                <div class="card-body text-center">
+                                    <div class="feature-icon-large">⌨️</div>
+                                    <h5 class="card-title">Keyboard Navigation</h5>
+                                    <p class="card-text">Navigate efficiently with keyboard shortcuts. Perfect for speed reading and focused study sessions.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Call to Action -->
+        <div class="cta-section text-center py-5 mb-4">
+            <div class="container">
+                <h3 class="mb-3">Ready to Transform Your Bible Study?</h3>
+                <p class="mb-4">Join thousands of users who are deepening their faith with our study tools</p>
+                <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg me-3">Create Free Account</a>
+                <a href="{{ url_for('auth.login') }}" class="btn btn-outline-primary btn-lg">Already have an account?</a>
+            </div>
+        </div>
+        {% endif %}
     </div>
+{% endblock %}
+
+{% block nav_script %}
+    {{ super() }}
+    <script>
+        // Smooth scroll to section function for guest navigation
+        function scrollToSection(sectionId) {
+            const element = document.getElementById(sectionId);
+            if (element) {
+                element.scrollIntoView({ 
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        }
+    </script>
+    <script src="{{ url_for('static', filename='navigate.js') }}"></script>
 {% endblock %}

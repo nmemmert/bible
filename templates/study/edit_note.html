@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="mb-0">✏️ Edit Note</h3>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    {{ form.book.label(class="form-label") }}
+                                    {{ form.book(class="form-control") }}
+                                    {% for error in form.book.errors %}
+                                        <div class="text-danger small">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group mb-3">
+                                    {{ form.chapter.label(class="form-label") }}
+                                    {{ form.chapter(class="form-control") }}
+                                    {% for error in form.chapter.errors %}
+                                        <div class="text-danger small">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group mb-3">
+                                    {{ form.verse.label(class="form-label") }}
+                                    {{ form.verse(class="form-control", placeholder="Optional") }}
+                                    {% for error in form.verse.errors %}
+                                        <div class="text-danger small">{{ error }}</div>
+                                    {% endfor %}
+                                    <small class="form-text text-muted">Leave blank for chapter notes</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            {{ form.note_text.label(class="form-label") }}
+                            {{ form.note_text(class="form-control") }}
+                            {% for error in form.note_text.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            {{ form.tags.label(class="form-label") }}
+                            {{ form.tags(class="form-control", placeholder="prayer, study, reflection, etc.") }}
+                            {% for error in form.tags.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                            <small class="form-text text-muted">Separate tags with commas</small>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ url_for('study.notes') }}" class="btn btn-secondary">Cancel</a>
+                            {{ form.submit(class="btn btn-primary", value="Update Note") }}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

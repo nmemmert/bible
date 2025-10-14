@@ -1,4 +1,7 @@
 {% extends "base.html" %}
+
+{% block body_attrs %}data-book="{{ content.get('book') }}" data-chapter="{{ content.get('chapter') }}"{% endblock %}
+
 {% block navbar %}
 <div hidden aria-hidden="true">
 <button
@@ -13,25 +16,55 @@
 </div>
 {% endblock navbar %}
 {% block content %}
-<div class="container-fluid mw-100">
-    <script>var book = "{{ content.get('book') }}";var chapterNumber = {{ content.get('chapter') }};</script>
-    <br><br>
-    <h2>{{ content.get('book') }} {{ content.get('chapter') }}</h2>
-    <span class=".h6 h6">© {{ version }}</span>
-    {% for heading, verses in content.get('verses').items() %}
-        {% if heading != 'none'%}
-            <h4><em>{{ heading }}</em></h4>
-        {% endif %}
-        {% for verse in verses %}
-            <p>{{ verse }}</p>
+<div class="container-fluid p-3">
+    
+    <!-- Chapter Header -->
+    <div class="embed-header mb-3">
+        <h3 class="mb-1">{{ content.get('book') }} {{ content.get('chapter') }}</h3>
+        <small class="text-muted">© {{ version }}</small>
+    </div>
+    
+    <!-- Chapter Content -->
+    <div class="embed-content">
+        {% for heading, verses in content.get('verses').items() %}
+            {% if heading != 'none'%}
+                <h5 class="section-heading mt-3 mb-2"><em>{{ heading }}</em></h5>
+            {% endif %}
+            {% for verse in verses %}
+                <p class="verse-text">{{ verse }}</p>
+            {% endfor %}
         {% endfor %}
-    {% endfor %}
-    <br><br>
-    {% if content.get('footnotes') %}
-            <h5>Footnotes:</h5>
-            <p>{{ content.get('footnotes') }}</p>
-    {% endif %}
+        
+        <!-- Footnotes -->
+        {% if content.get('footnotes') %}
+            <div class="footnotes-section mt-4 pt-3">
+                <h6>Footnotes:</h6>
+                <p class="text-muted">{{ content.get('footnotes') }}</p>
+            </div>
+        {% endif %}
+    </div>
 </div>
 {% endblock content %}
 {% block nav_script %}
+    <script>
+        // Simple dropdown function (exposed globally)
+        window.toggleDropdown = function(element, event) {
+            event.preventDefault();
+            event.stopPropagation();
+            
+            const menu = element.parentElement.querySelector('.dropdown-menu');
+            
+            // Hide all other dropdowns
+            document.querySelectorAll('.dropdown-menu').forEach(function(m) {
+                if (m !== menu) m.style.display = 'none';
+            });
+            
+            // Toggle this dropdown
+            if (menu) {
+                menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+            }
+            
+            return false;
+        };
+    </script>
 {% endblock nav_script %}

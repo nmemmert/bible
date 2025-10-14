@@ -1,95 +1,590 @@
 {% extends "base.html" %}
 
-{% block title %}Passage Grid{% endblock %}
+{% block title %}Bible Overview{% endblock %}
+
 {% block content %}
-<div class="container-fluid mw-100">
-    <form method="post" role="presentation">
+<div class="overview-container">
+    <!-- Header -->
+    <div class="overview-header">
+        <div class="header-content">
+            <h1 class="overview-title">📊 Bible Overview</h1>
+            <p class="overview-subtitle">Compare multiple passages side by side • Study different versions • Analyze parallel texts</p>
+        </div>
+        
+        <div class="overview-controls">
+            <button id="reset-all" class="control-btn reset-btn">🔄 Reset All</button>
+            <button id="sync-chapters" class="control-btn sync-btn">🔗 Sync Chapters</button>
+            <button id="fullscreen-mode" class="control-btn fullscreen-btn">⛶ Fullscreen</button>
+        </div>
+    </div>
+
+    <!-- Panel Grid -->
+    <div class="panels-grid" id="panels-grid">
         {% for i in range(4) %}
-            {% if i % 2 == 0 %}<div class="container">{% endif %}
-                <div class="item">
-                <div align="center">
-                <label for="book-{{ i }}" hidden="hidden" aria-label="Book selection {{ i }}"></label>
-                <select class="passage-form" id="book-{{ i }}" name="book" required>
-                    <option selected value="Genesis">Genesis</option>
-                    <option value="Exodus">Exodus</option>
-                    <option value="Leviticus">Leviticus</option>
-                    <option value="Numbers">Numbers</option>
-                    <option value="Deuteronomy">Deuteronomy</option>
-                    <option value="Joshua">Joshua</option>
-                    <option value="Judges">Judges</option>
-                    <option value="Ruth">Ruth</option>
-                    <option value="1 Samuel">1 Samuel</option>
-                    <option value="2 Samuel">2 Samuel</option>
-                    <option value="1 Kings">1 Kings</option>
-                    <option value="2 Kings">2 Kings</option>
-                    <option value="1 Chronicles">1 Chronicles</option>
-                    <option value="2 Chronicles">2 Chronicles</option>
-                    <option value="Ezra">Ezra</option>
-                    <option value="Nehemiah">Nehemiah</option>
-                    <option value="Esther">Esther</option>
-                    <option value="Job">Job</option>
-                    <option value="Psalms">Psalms</option>
-                    <option value="Proverbs">Proverbs</option>
-                    <option value="Ecclesiastes">Ecclesiastes</option>
-                    <option value="Song of Solomon">Song of Solomon</option>
-                    <option value="Isaiah">Isaiah</option>
-                    <option value="Jeremiah">Jeremiah</option>
-                    <option value="Lamentations">Lamentations</option>
-                    <option value="Ezekiel">Ezekiel</option>
-                    <option value="Daniel">Daniel</option>
-                    <option value="Hosea">Hosea</option>
-                    <option value="Joel">Joel</option>
-                    <option value="Amos">Amos</option>
-                    <option value="Obadiah">Obadiah</option>
-                    <option value="Jonah">Jonah</option>
-                    <option value="Micah">Micah</option>
-                    <option value="Nahum">Nahum</option>
-                    <option value="Habakkuk">Habakkuk</option>
-                    <option value="Zephaniah">Zephaniah</option>
-                    <option value="Haggai">Haggai</option>
-                    <option value="Zechariah">Zechariah</option>
-                    <option value="Malachi">Malachi</option>
-                    <option value="Matthew">Matthew</option>
-                    <option value="Mark">Mark</option>
-                    <option value="Luke">Luke</option>
-                    <option value="John">John</option>
-                    <option value="Acts">Acts</option>
-                    <option value="Romans">Romans</option>
-                    <option value="1 Corinthians">1 Corinthians</option>
-                    <option value="2 Corinthians">2 Corinthians</option>
-                    <option value="Galatians">Galatians</option>
-                    <option value="Ephesians">Ephesians</option>
-                    <option value="Philippians">Philippians</option>
-                    <option value="Colossians">Colossians</option>
-                    <option value="1 Thessalonians">1 Thessalonians</option>
-                    <option value="2 Thessalonians">2 Thessalonians</option>
-                    <option value="1 Timothy">1 Timothy</option>
-                    <option value="2 Timothy">2 Timothy</option>
-                    <option value="Titus">Titus</option>
-                    <option value="Philemon">Philemon</option>
-                    <option value="Hebrews">Hebrews</option>
-                    <option value="James">James</option>
-                    <option value="1 Peter">1 Peter</option>
-                    <option value="2 Peter">2 Peter</option>
-                    <option value="1 John">1 John</option>
-                    <option value="2 John">2 John</option>
-                    <option value="3 John">3 John</option>
-                    <option value="Jude">Jude</option>
-                    <option value="Revelation">Revelation</option>
-                </select>
-                <label for="chapter-{{ i }}" hidden="hidden" aria-label="Chapter selection {{ i }}"></label>
-                <select class="passage-form" id="chapter-{{ i }}" name="chapter"></select>
-                <label for="version-selection-{{ i }}" hidden="hidden" aria-label="Version selection {{ i }}"></label>
-                <select class="passage-form" id="version-selection-{{ i }}">
-                    {% for version in versions %}
-                        <option {% if version == 'KJV' %}selected{% endif %} value="{{version}}">{{version}}</option>
-                    {% endfor %}
-                </select></div><br>
-                <iframe style="border: none; width: 100%; height: 70vh;" id="bible-frame-{{ i }}" title="Bible frame {{ i }}" referrerpolicy="origin" loading="lazy" src="/embed?version=KJV&book=Genesis&chapter=1"></iframe>
+        <div class="bible-panel" data-panel="{{ i }}">
+            <div class="panel-header">
+                <div class="panel-title">
+                    <span class="panel-number">{{ i + 1 }}</span>
+                    <span class="panel-label">Panel {{ i + 1 }}</span>
                 </div>
-                {% if i % 2 == 0 %}<br><span style="width: 2%">&nbsp;</span><br>{% endif %}
-            {% if i % 2 != 0 %}</div><hr>{% endif %}
+                
+                <div class="panel-controls">
+                    <select class="book-selector" id="book-{{ i }}" data-panel="{{ i }}">
+                        <option value="Genesis">Genesis</option>
+                        <option value="Exodus">Exodus</option>
+                        <option value="Leviticus">Leviticus</option>
+                        <option value="Numbers">Numbers</option>
+                        <option value="Deuteronomy">Deuteronomy</option>
+                        <option value="Joshua">Joshua</option>
+                        <option value="Judges">Judges</option>
+                        <option value="Ruth">Ruth</option>
+                        <option value="1 Samuel">1 Samuel</option>
+                        <option value="2 Samuel">2 Samuel</option>
+                        <option value="1 Kings">1 Kings</option>
+                        <option value="2 Kings">2 Kings</option>
+                        <option value="1 Chronicles">1 Chronicles</option>
+                        <option value="2 Chronicles">2 Chronicles</option>
+                        <option value="Ezra">Ezra</option>
+                        <option value="Nehemiah">Nehemiah</option>
+                        <option value="Esther">Esther</option>
+                        <option value="Job">Job</option>
+                        <option value="Psalms">Psalms</option>
+                        <option value="Proverbs">Proverbs</option>
+                        <option value="Ecclesiastes">Ecclesiastes</option>
+                        <option value="Song of Solomon">Song of Solomon</option>
+                        <option value="Isaiah">Isaiah</option>
+                        <option value="Jeremiah">Jeremiah</option>
+                        <option value="Lamentations">Lamentations</option>
+                        <option value="Ezekiel">Ezekiel</option>
+                        <option value="Daniel">Daniel</option>
+                        <option value="Hosea">Hosea</option>
+                        <option value="Joel">Joel</option>
+                        <option value="Amos">Amos</option>
+                        <option value="Obadiah">Obadiah</option>
+                        <option value="Jonah">Jonah</option>
+                        <option value="Micah">Micah</option>
+                        <option value="Nahum">Nahum</option>
+                        <option value="Habakkuk">Habakkuk</option>
+                        <option value="Zephaniah">Zephaniah</option>
+                        <option value="Haggai">Haggai</option>
+                        <option value="Zechariah">Zechariah</option>
+                        <option value="Malachi">Malachi</option>
+                        <option value="Matthew">Matthew</option>
+                        <option value="Mark">Mark</option>
+                        <option value="Luke">Luke</option>
+                        <option value="John">John</option>
+                        <option value="Acts">Acts</option>
+                        <option value="Romans">Romans</option>
+                        <option value="1 Corinthians">1 Corinthians</option>
+                        <option value="2 Corinthians">2 Corinthians</option>
+                        <option value="Galatians">Galatians</option>
+                        <option value="Ephesians">Ephesians</option>
+                        <option value="Philippians">Philippians</option>
+                        <option value="Colossians">Colossians</option>
+                        <option value="1 Thessalonians">1 Thessalonians</option>
+                        <option value="2 Thessalonians">2 Thessalonians</option>
+                        <option value="1 Timothy">1 Timothy</option>
+                        <option value="2 Timothy">2 Timothy</option>
+                        <option value="Titus">Titus</option>
+                        <option value="Philemon">Philemon</option>
+                        <option value="Hebrews">Hebrews</option>
+                        <option value="James">James</option>
+                        <option value="1 Peter">1 Peter</option>
+                        <option value="2 Peter">2 Peter</option>
+                        <option value="1 John">1 John</option>
+                        <option value="2 John">2 John</option>
+                        <option value="3 John">3 John</option>
+                        <option value="Jude">Jude</option>
+                        <option value="Revelation">Revelation</option>
+                    </select>
+                    
+                    <select class="chapter-selector" id="chapter-{{ i }}" data-panel="{{ i }}">
+                        <!-- Chapters will be populated by JavaScript -->
+                    </select>
+                    
+                    <select class="version-selector" id="version-{{ i }}" data-panel="{{ i }}">
+                        {% for version in versions %}
+                            <option {% if version == 'KJV' %}selected{% endif %} value="{{version}}">{{version}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="panel-actions">
+                    <button class="action-btn prev-btn" data-panel="{{ i }}" data-action="prev">‹</button>
+                    <button class="action-btn next-btn" data-panel="{{ i }}" data-action="next">›</button>
+                    <button class="action-btn expand-btn" data-panel="{{ i }}" data-action="expand">⛶</button>
+                </div>
+            </div>
+            
+            <div class="panel-content">
+                <div class="loading-spinner" id="loading-{{ i }}">
+                    <div class="spinner"></div>
+                    <p>Loading passage...</p>
+                </div>
+                
+                <iframe 
+                    class="bible-frame" 
+                    id="bible-frame-{{ i }}" 
+                    title="Bible Panel {{ i + 1 }}"
+                    src="/embed?version=KJV&book=Genesis&chapter=1"
+                    loading="lazy">
+                </iframe>
+            </div>
+        </div>
         {% endfor %}
-    </form>
+    </div>
+    
+    <!-- Quick Navigation -->
+    <div class="quick-nav">
+        <div class="quick-nav-content">
+            <h3>🚀 Quick Navigation</h3>
+            <div class="quick-buttons">
+                <button class="quick-btn" data-preset="gospels">📖 Gospels Comparison</button>
+                <button class="quick-btn" data-preset="psalms">🎵 Psalms Study</button>
+                <button class="quick-btn" data-preset="prophets">👑 Major Prophets</button>
+                <button class="quick-btn" data-preset="creation">🌍 Creation Accounts</button>
+            </div>
+        </div>
+    </div>
 </div>
+
+<!-- Fullscreen Modal -->
+<div id="fullscreen-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="modal-title">Bible Passage</h2>
+            <button class="close-btn" id="close-modal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <iframe id="modal-iframe" src="" title="Fullscreen Bible View"></iframe>
+        </div>
+    </div>
+</div>
+
+<style>
+.overview-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 1rem;
+    min-height: 100vh;
+}
+
+.overview-header {
+    background: linear-gradient(135deg, var(--primary-accent) 0%, var(--secondary-accent) 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: 20px;
+    margin-bottom: 2rem;
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+}
+
+.header-content {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.overview-title {
+    font-size: 2.5rem;
+    font-weight: 300;
+    margin-bottom: 0.5rem;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.overview-subtitle {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    font-weight: 300;
+}
+
+.overview-controls {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.control-btn {
+    background: rgba(255,255,255,0.2);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: white;
+    padding: 0.6rem 1.2rem;
+    border-radius: 25px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.control-btn:hover {
+    background: rgba(255,255,255,0.3);
+    transform: translateY(-1px);
+}
+
+.panels-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.bible-panel {
+    background: var(--input-bg);
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.bible-panel:hover {
+    box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+    transform: translateY(-2px);
+}
+
+.panel-header {
+    background: var(--dropdown-hover-bg);
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.panel-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-shrink: 0;
+}
+
+.panel-number {
+    background: var(--primary-accent);
+    color: white;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.panel-label {
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+.panel-controls {
+    display: flex;
+    gap: 0.5rem;
+    flex: 1;
+    min-width: 0;
+}
+
+.book-selector,
+.chapter-selector,
+.version-selector {
+    background: var(--dropdown-bg);
+    border: 1px solid var(--input-border);
+    border-radius: 8px;
+    padding: 0.4rem 0.6rem;
+    font-size: 0.85rem;
+    color: var(--input-text);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.book-selector {
+    flex: 2;
+    min-width: 100px;
+}
+
+.chapter-selector {
+    flex: 1;
+    min-width: 60px;
+}
+
+.version-selector {
+    flex: 1;
+    min-width: 80px;
+}
+
+.book-selector:focus,
+.chapter-selector:focus,
+.version-selector:focus {
+    outline: none;
+    border-color: var(--primary-accent);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary-accent) 20%, transparent 80%);
+}
+
+.panel-actions {
+    display: flex;
+    gap: 0.25rem;
+    flex-shrink: 0;
+}
+
+.action-btn {
+    background: var(--primary-accent);
+    color: white;
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.action-btn:hover {
+    background: color-mix(in srgb, var(--primary-accent) 80%, black 20%);
+    transform: translateY(-1px);
+}
+
+.panel-content {
+    height: 500px;
+    position: relative;
+    background: var(--input-bg);
+}
+
+.loading-spinner {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: var(--input-bg);
+    z-index: 10;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid color-mix(in srgb, var(--input-bg) 40%, black 60%);
+    border-top: 3px solid var(--primary-accent);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 1rem;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.bible-frame {
+    width: 100%;
+    height: 100%;
+    border: none;
+    background: var(--input-bg);
+}
+
+.quick-nav {
+    background: var(--input-bg);
+    border-radius: 15px;
+    padding: 1.5rem;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    border: 1px solid var(--border-color);
+}
+
+.quick-nav-content h3 {
+    color: var(--text-color);
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.quick-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.quick-btn {
+    background: linear-gradient(135deg, var(--search-accent-1) 0%, var(--search-accent-2) 100%);
+    color: white;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 25px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    box-shadow: 0 3px 10px rgba(79, 172, 254, 0.3);
+}
+
+.quick-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(79, 172, 254, 0.4);
+}
+
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.8);
+}
+
+.modal-content {
+    background: var(--input-bg);
+    margin: 2% auto;
+    width: 95%;
+    height: 90%;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-header {
+    background: var(--primary-accent);
+    color: white;
+    padding: 1rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 10px 10px 0 0;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 2rem;
+    cursor: pointer;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-body {
+    flex: 1;
+    padding: 0;
+}
+
+.modal-body iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+/* Dark Mode */
+[data-theme="dark"] .bible-panel,
+[data-theme="dark"] .quick-nav {
+    background: var(--input-bg);
+    border-color: var(--border-color);
+}
+
+[data-theme="dark"] .panel-header {
+    background: var(--dropdown-hover-bg);
+    border-color: var(--border-color);
+}
+
+[data-theme="dark"] .panel-label {
+    color: var(--text-color);
+}
+
+[data-theme="dark"] .book-selector,
+[data-theme="dark"] .chapter-selector,
+[data-theme="dark"] .version-selector {
+    background: var(--input-bg);
+    border-color: var(--input-border);
+    color: var(--input-text);
+}
+
+[data-theme="dark"] .modal-content {
+    background: var(--input-bg);
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .overview-container {
+        padding: 0.5rem;
+    }
+    
+    .overview-header {
+        padding: 1.5rem 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .overview-title {
+        font-size: 2rem;
+    }
+    
+    .panels-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .panel-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.75rem;
+    }
+    
+    .panel-controls {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .book-selector,
+    .chapter-selector,
+    .version-selector {
+        flex: none;
+    }
+    
+    .panel-actions {
+        align-self: center;
+    }
+    
+    .panel-content {
+        height: 400px;
+    }
+    
+    .quick-buttons {
+        flex-direction: column;
+    }
+    
+    .quick-btn {
+        width: 100%;
+        max-width: 300px;
+        margin: 0 auto;
+    }
+    
+    .modal-content {
+        margin: 1% auto;
+        width: 98%;
+        height: 95%;
+    }
+}
+
+@media (max-width: 480px) {
+    .panels-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .panel-content {
+        height: 350px;
+    }
+}
+</style>
+
+{% endblock %}
+
+{% block nav_script %}
+    {{ super() }}
+    <script src="{{ url_for('static', filename='bible_overview.js') }}"></script>
 {% endblock %}

@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <!-- Search Interface -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">🔍 Bible Search</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-8 mb-3">
+                    <label for="search-box" class="form-label">Search for words or phrases</label>
+                    <input class="form-control" type="text" id="search-box" placeholder="Type to search..." autocomplete="off">
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="version-selection" class="form-label">Bible Version</label>
+                    <select class="form-control" id="version-selection">
+                        {% for version in versions %}
+                            <option {% if version == 'KJV' %}selected{% endif %} value="{{version}}">{{version}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            
+            <div class="search-info">
+                <p class="text-muted">
+                    <strong>Search Tips:</strong>
+                    • Use quotes for exact phrases: "love one another"<br>
+                    • Search for multiple words: faith hope love<br>
+                    • Use wildcards: love* (finds love, loves, loved, etc.)
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search Results -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">Search Results</h5>
+        </div>
+        <div class="card-body">
+            <div id="search-status" class="text-center text-muted mb-3">
+                <p>Enter search terms above to find Bible verses</p>
+            </div>
+            <ul id="search-results" class="search-results-list"></ul>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript" async="" src="{{ url_for('static', filename='search.js') }}"></script>
+
+{% endblock %}

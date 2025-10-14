@@ -1,21 +1,456 @@
 {% extends "base.html" %}
 
-{% block title %}{{ title }}{% endblock %}
-{% block content %}
-    <div class="container-fluid mw-100">
-        <div align="center">
-            <input class="passage-form" type="text" id="search-box" placeholder="Type to search..." style="width: 70%">
-            <label for="version-selection" hidden="hidden" aria-label="Version selection"></label>
-            <select class="passage-form" id="version-selection">
-                {% for version in versions %}
-                    <option {% if version == 'KJV' %}selected{% endif %} value="{{version}}">{{version}}</option>
-                {% endfor %}
-            </select>
-        </div>
-        <ul id="search-results" style="list-style-type:none;"></ul>
+{% block title %}Bible Search{% endblock %}
 
+{% block content %}
+<div class="search-container">
+    <!-- Search Header -->
+    <div class="search-header">
+        <div class="search-hero">
+            <h1 class="search-title">🔍 Search the Scriptures</h1>
+            <p class="search-subtitle">Find verses, phrases, and topics across different Bible versions</p>
+        </div>
+        
+        <div class="search-controls">
+            <div class="search-input-group">
+                <input type="text" id="search-box" class="search-input" 
+                       placeholder="Enter words, phrases, or topics..." 
+                       autocomplete="off" 
+                       spellcheck="false">
+                <div class="search-icon">🔍</div>
+            </div>
+            
+            <div class="search-options">
+                <label for="version-selection" class="version-label">Bible Version:</label>
+                <select id="version-selection" class="version-dropdown">
+                    {% for version in versions %}
+                        <option {% if version == 'KJV' %}selected{% endif %} value="{{version}}">{{version}}</option>
+                    {% endfor %}
+                </select>
+                
+                <button id="search-tips-btn" class="tips-btn" type="button">💡 Search Tips</button>
+            </div>
+        </div>
     </div>
 
-    <script type="text/javascript" async="" src="{{ url_for('static', filename='search.js') }}"></script>
+    <!-- Search Tips Panel -->
+    <div id="search-tips" class="search-tips hidden">
+        <div class="tips-content">
+            <h3>🎯 Advanced Search Tips</h3>
+            <div class="tips-grid">
+                <div class="tip-item">
+                    <strong>Exact Phrases:</strong>
+                    <code>"love one another"</code>
+                </div>
+                <div class="tip-item">
+                    <strong>Multiple Words:</strong>
+                    <code>faith hope love</code>
+                </div>
+                <div class="tip-item">
+                    <strong>Wildcards:</strong>
+                    <code>love* (finds loves, loved, etc.)</code>
+                </div>
+                <div class="tip-item">
+                    <strong>Names & Places:</strong>
+                    <code>Jerusalem David Moses</code>
+                </div>
+            </div>
+        </div>
+    </div>
 
+    <!-- Search Status -->
+    <div id="search-status" class="search-status">
+        <div class="status-content">
+            <div class="status-icon">📖</div>
+            <p>Ready to search the scriptures. Enter your search terms above.</p>
+        </div>
+    </div>
+
+    <!-- Search Results -->
+    <div id="search-results-container" class="results-container hidden">
+        <div class="results-header">
+            <h2 id="results-count">Search Results</h2>
+            <div class="results-actions">
+                <button id="clear-results" class="clear-btn">Clear Results</button>
+            </div>
+        </div>
+        
+        <div id="search-results" class="results-list"></div>
+        
+        <div id="no-results" class="no-results hidden">
+            <div class="no-results-content">
+                <div class="no-results-icon">🤔</div>
+                <h3>No verses found</h3>
+                <p>Try different search terms or check your spelling</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.search-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+    min-height: 100vh;
+}
+
+.search-header {
+    background: linear-gradient(135deg, var(--search-accent-1) 0%, var(--search-accent-2) 100%);
+    color: white;
+    padding: 3rem 2rem;
+    border-radius: 20px;
+    margin-bottom: 2rem;
+    box-shadow: 0 10px 30px rgba(79, 172, 254, 0.3);
+}
+
+.search-hero {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.search-title {
+    font-size: 3rem;
+    font-weight: 300;
+    margin-bottom: 0.5rem;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.search-subtitle {
+    font-size: 1.2rem;
+    opacity: 0.9;
+    font-weight: 300;
+}
+
+.search-controls {
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.search-input-group {
+    position: relative;
+    margin-bottom: 1.5rem;
+}
+
+.search-input {
+    width: 100%;
+    padding: 1rem 1.5rem 1rem 3rem;
+    font-size: 1.2rem;
+    border: none;
+    border-radius: 50px;
+    background: var(--input-bg);
+    color: var(--text-color);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+}
+
+.search-input:focus {
+    outline: none;
+    background: var(--input-bg);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    transform: translateY(-2px);
+}
+
+.search-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.2rem;
+    opacity: 0.7;
+}
+
+.search-options {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.version-label {
+    font-weight: 500;
+}
+
+.version-dropdown {
+    background: var(--dropdown-bg);
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 25px;
+    color: var(--text-color);
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.tips-btn {
+    background: rgba(255,255,255,0.2);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 25px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.tips-btn:hover {
+    background: rgba(255,255,255,0.3);
+}
+
+.search-tips {
+    background: var(--input-bg);
+    border-radius: 15px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    border: 1px solid var(--border-color);
+}
+
+.search-tips.hidden {
+    display: none;
+}
+
+.tips-content h3 {
+    color: var(--search-accent-1);
+    margin-bottom: 1rem;
+    font-size: 1.3rem;
+}
+
+.tips-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+}
+
+.tip-item {
+    padding: 1rem;
+    background: var(--dropdown-hover-bg);
+    border-radius: 10px;
+    border-left: 4px solid var(--search-accent-1);
+}
+
+.tip-item strong {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--text-color);
+}
+
+.tip-item code {
+    background: var(--border-color);
+    padding: 0.2rem 0.5rem;
+    border-radius: 5px;
+    font-family: monospace;
+    color: var(--input-text);
+}
+
+.search-status {
+    background: var(--input-bg);
+    border-radius: 15px;
+    padding: 2rem;
+    text-align: center;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    border: 1px solid var(--border-color);
+}
+
+.status-content {
+    color: var(--text-color);
+}
+
+.status-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.results-container {
+    background: var(--input-bg);
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+}
+
+.results-container.hidden {
+    display: none;
+}
+
+.results-header {
+    background: var(--dropdown-hover-bg);
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.results-header h2 {
+    color: var(--text-color);
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.clear-btn {
+    background: var(--danger-color);
+    color: var(--bg-color);
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.clear-btn:hover {
+    background: color-mix(in srgb, var(--danger-color) 85%, black 15%);
+}
+
+.results-list {
+    max-height: 600px;
+    overflow-y: auto;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+
+.result-item {
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+}
+
+.result-item:hover {
+    background: var(--dropdown-hover-bg);
+}
+
+.result-item:last-child {
+    border-bottom: none;
+}
+
+.result-reference {
+    display: inline-block;
+    background: var(--search-accent-1);
+    color: white;
+    padding: 0.3rem 0.8rem;
+    border-radius: 15px;
+    text-decoration: none;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.result-reference:hover {
+    background: color-mix(in srgb, var(--search-accent-1) 80%, black 20%);
+    color: white;
+    text-decoration: none;
+    transform: translateY(-1px);
+}
+
+.result-text {
+    color: var(--text-color);
+    line-height: 1.6;
+    margin-top: 0.5rem;
+}
+
+.no-results {
+    padding: 3rem 2rem;
+    text-align: center;
+    color: var(--text-color);
+}
+
+.no-results.hidden {
+    display: none;
+}
+
+.no-results-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.no-results h3 {
+    margin-bottom: 0.5rem;
+    color: var(--text-color);
+}
+
+/* Dark Mode */
+[data-theme="dark"] .search-tips,
+[data-theme="dark"] .search-status,
+[data-theme="dark"] .results-container {
+    background: var(--input-bg);
+    border-color: var(--border-color);
+    color: var(--text-color);
+}
+
+[data-theme="dark"] .tip-item {
+    background: var(--dropdown-hover-bg);
+}
+
+[data-theme="dark"] .results-header {
+    background: var(--dropdown-hover-bg);
+}
+
+[data-theme="dark"] .result-item:hover {
+    background: var(--dropdown-hover-bg);
+}
+
+/* Loading Animation */
+.loading {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 2px solid color-mix(in srgb, var(--border-color) 60%, white 40%);
+    border-top: 2px solid var(--search-accent-1);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .search-container {
+        padding: 1rem;
+    }
+    
+    .search-header {
+        padding: 2rem 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .search-title {
+        font-size: 2rem;
+    }
+    
+    .search-subtitle {
+        font-size: 1rem;
+    }
+    
+    .search-options {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.75rem;
+    }
+    
+    .tips-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .results-header {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: stretch;
+    }
+    
+    .result-item {
+        padding: 1rem;
+    }
+}
+</style>
+
+{% endblock %}
+
+{% block nav_script %}
+    {{ super() }}
+    <script src="{{ url_for('static', filename='bible_search.js') }}"></script>
 {% endblock %}

@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="lexicon-entry">
+                <div class="lexicon-header">
+                    <h2>{{ entry.strongs_number }}</h2>
+                    <div class="original-word">{{ entry.original_word }}</div>
+                    <div class="transliteration">{{ entry.transliteration }}</div>
+                    <div class="pronunciation">{{ entry.pronunciation }}</div>
+                    <span class="part-of-speech">{{ entry.part_of_speech }}</span>
+                </div>
+                
+                <div class="definition">
+                    <h4>Definition</h4>
+                    <p>{{ entry.definition }}</p>
+                </div>
+                
+                {% if entry.usage %}
+                <div class="usage">
+                    <h5>Usage</h5>
+                    <p>{{ entry.usage }}</p>
+                </div>
+                {% endif %}
+            </div>
+            
+            {% if current_user.is_authenticated %}
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">My Study Notes</h5>
+                </div>
+                <div class="card-body">
+                    {% if user_study %}
+                        <div class="mb-3">
+                            {% if user_study.title %}
+                                <h6>{{ user_study.title }}</h6>
+                            {% endif %}
+                            <p>{{ user_study.notes|nl2br if user_study.notes else "No notes yet." }}</p>
+                            <small class="text-muted">Last updated: {{ user_study.updated_at.strftime('%B %d, %Y at %I:%M %p') }}</small>
+                        </div>
+                        <a href="{{ url_for('study.word_studies') }}" class="btn btn-sm btn-primary">Edit Study</a>
+                    {% else %}
+                        <p class="text-muted">You haven't created a study for this word yet.</p>
+                        <a href="{{ url_for('study.create_word_study') }}?strongs={{ entry.strongs_number }}" class="btn btn-sm btn-primary">
+                            Create Word Study
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">Language Info</h6>
+                </div>
+                <div class="card-body">
+                    <p><strong>Language:</strong> {{ entry.language.title() }}</p>
+                    <p><strong>Strong's Number:</strong> {{ entry.strongs_number }}</p>
+                    {% if entry.part_of_speech %}
+                        <p><strong>Part of Speech:</strong> {{ entry.part_of_speech.title() }}</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            {% if current_user.is_authenticated %}
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h6 class="mb-0">Quick Actions</h6>
+                </div>
+                <div class="card-body">
+                    <a href="{{ url_for('study.create_word_study') }}?strongs={{ entry.strongs_number }}" class="btn btn-sm btn-outline-primary btn-block mb-2">
+                        Add to Word Studies
+                    </a>
+                    <a href="{{ url_for('study.add_note') }}" class="btn btn-sm btn-outline-secondary btn-block">
+                        Create Note
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

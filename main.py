@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-A self-hosted webapp of various Bible versions including the KJV, ESV, and ASV.
+A comprehensive Bible study webapp with Greek/Hebrew support, notes, and study guides.
 """
 from functools import cache
 from hashlib import sha256
@@ -9,6 +9,7 @@ from random import randint
 import re
 import sys
 import time
+import os
 from typing import Tuple, Union
 
 from flask import (
@@ -16,6 +17,7 @@ from flask import (
     redirect, Response, session, url_for,
     request, abort, make_response
 )
+from flask_login import LoginManager, current_user
 from multi_bible_search import BibleSearch
 
 # pylint: disable=import-error,wildcard-import
@@ -24,6 +26,10 @@ from compress import Compress
 from navigate import NavigatePassage, NavigateRel, NavigateVersion
 # Bible + Exception Imports
 from bibles import *
+# New imports for authentication and study tools
+from models import db, User
+from auth_routes import auth_bp
+from study_routes import study_bp
 
 DEBUG = False
 
@@ -31,11 +37,40 @@ DEBUG = False
 # pylint: disable=too-many-locals,undefined-variable,too-many-statements,consider-iterating-dictionary
 def create_app() -> Flask:
     """
-    Creates the webapp
+    Creates the webapp with authentication and study tools
     """
     app = Flask(__name__)
+    
+    # Configuration
     app.config['SECRET_KEY'] = str(sha256(str(time.localtime()).encode("utf-8")))
+    
+    # Database configuration
+    basedir = os.path.abspath(os.path.dirname(__file__))
+    app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{os.path.join(basedir, "bible_study.db")}'
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    
+    # Initialize extensions
+    db.init_app(app)
     Compress(app)
+    
+    # Initialize Flask-Login
+    login_manager = LoginManager()
+    login_manager.init_app(app)
+    login_manager.login_view = 'auth.login'
+    login_manager.login_message = 'Please log in to access this page.'
+    login_manager.login_message_category = 'info'
+    
+    @login_manager.user_loader
+    def load_user(user_id):
+        return db.session.get(User, int(user_id))
+    
+    # Register blueprints
+    app.register_blueprint(auth_bp, url_prefix='/auth')
+    app.register_blueprint(study_bp, url_prefix='/study')
+    
+    # Create database tables
+    with app.app_context():
+        db.create_all()
 
     if DEBUG:
         app.jinja_env.auto_reload = True
@@ -121,6 +156,39 @@ def create_app() -> Flask:
                 return abort(400)
             if form.chapter.data:
                 error_mess = "Please submit the book first"
+        # Get user study data if authenticated
+        user_data = {}
+        if current_user.is_authenticated:
+            from models import Note, Bookmark, StudyGuide, Highlight
+            
+            # Get statistics
+            note_count = Note.query.filter_by(user_id=current_user.id).count()
+            bookmark_count = Bookmark.query.filter_by(user_id=current_user.id).count()
+            highlight_count = Highlight.query.filter_by(user_id=current_user.id).count()
+            study_guide_count = StudyGuide.query.filter_by(user_id=current_user.id).count()
+            
+            # Get recent items
+            recent_notes = Note.query.filter_by(user_id=current_user.id)\
+                              .order_by(Note.created_at.desc()).limit(5).all()
+            recent_guides = StudyGuide.query.filter_by(user_id=current_user.id)\
+                                           .order_by(StudyGuide.created_at.desc()).limit(5).all()
+            
+            # Get recent bookmarks
+            recent_bookmarks = Bookmark.query.filter_by(user_id=current_user.id)\
+                                            .order_by(Bookmark.created_at.desc()).limit(5).all()
+            
+            user_data = {
+                'stats': {
+                    'notes': note_count,
+                    'bookmarks': bookmark_count,
+                    'highlights': highlight_count,
+                    'study_guides': study_guide_count
+                },
+                'recent_notes': recent_notes,
+                'recent_guides': recent_guides,
+                'recent_bookmarks': recent_bookmarks
+            }
+        
         html: str = render_template(
             'index.html',
             title='Home',
@@ -129,7 +197,8 @@ def create_app() -> Flask:
             error_mess=error_mess,
             version_select=version_select,
             book=session.get('select_book', 'Genesis'),
-            chapter=session.get('select_chapter', '1')
+            chapter=session.get('select_chapter', '1'),
+            user_data=user_data
         )
         return minify.sub('', html)
 

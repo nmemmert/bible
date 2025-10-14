@@ -2,9 +2,10 @@
 
 {% block title %} Copyright Notice {% endblock %}
 
+{% block body_attrs %}data-book="Genesis" data-chapter="1"{% endblock %}
+
 {% block content %}
 <div class="container-fluid mw-100">
-    <script>var book = "Genesis";var chapterNumber = 1;</script>
     <div lang="en-US">
         <h2>ACV Notice</h2>
         <p>A Conservative Version (ACV) was translated by Dr. Walter L. Porter. The ACV is in the public domain. <br>The translation can be accessed online at http://www.stillvoices.org.<br>Distribution license: Public Domain</p>
@@ -179,4 +180,25 @@
 </div>
 {% endblock content %}
 {% block nav_script %}
+    <script>
+        // Simple dropdown function (exposed globally)
+        window.toggleDropdown = function(element, event) {
+            event.preventDefault();
+            event.stopPropagation();
+            
+            const menu = element.parentElement.querySelector('.dropdown-menu');
+            
+            // Hide all other dropdowns
+            document.querySelectorAll('.dropdown-menu').forEach(function(m) {
+                if (m !== menu) m.style.display = 'none';
+            });
+            
+            // Toggle this dropdown
+            if (menu) {
+                menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+            }
+            
+            return false;
+        };
+    </script>
 {% endblock nav_script %}
