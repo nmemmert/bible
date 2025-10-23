@@ -4,7 +4,7 @@ Study tool routes for notes, bookmarks, highlights, and study guides
 from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify
 from flask_login import current_user, login_required
 from models import db, Note, Bookmark, Highlight, StudyGuide, StudyGuideSection, WordStudy, GreekHebrewLexicon
-from forms import NoteForm, BookmarkForm, HighlightForm, StudyGuideForm, StudyGuideSectionForm, WordStudyForm
+from forms import NoteForm, StudyGuideForm, StudyGuideSectionForm, WordStudyForm
 
 study_bp = Blueprint('study', __name__)
 

@@ -3,7 +3,7 @@ Authentication forms for user registration and login
 """
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, BooleanField, SelectField, TextAreaField, IntegerField, HiddenField
-from wtforms.validators import DataRequired, Email, EqualTo, Length, ValidationError, Optional
+from wtforms.validators import DataRequired, Email, EqualTo, Length, ValidationError, Optional, Regexp
 from models import User
 
 
@@ -19,7 +19,11 @@ class RegistrationForm(FlaskForm):
     """User registration form"""
     username = StringField('Username', validators=[DataRequired(), Length(min=4, max=25)])
     email = StringField('Email', validators=[DataRequired(), Email()])
-    password = PasswordField('Password', validators=[DataRequired(), Length(min=6)])
+    password = PasswordField('Password', validators=[
+        DataRequired(), 
+        Length(min=8, message='Password must be at least 8 characters long'),
+        Regexp(r'(?=.*[a-z])(?=.*[A-Z])(?=.*\d)', message='Password must contain at least one lowercase letter, one uppercase letter, and one number')
+    ])
     password2 = PasswordField('Repeat Password', validators=[DataRequired(), EqualTo('password')])
     submit = SubmitField('Register')
 
