@@ -22,6 +22,11 @@ const loadBibleData = async () => {
 };
 
 const api = {
+  post: axios.post,
+  get: axios.get,
+  put: axios.put,
+  delete: axios.delete,
+
   async getVersions() {
     const { versions } = await loadBibleData();
     return { data: versions };

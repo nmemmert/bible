@@ -65,7 +65,7 @@ const handleLogin = async () => {
   error.value = ''
 
   try {
-    const response = await api.post('/auth/login', form.value)
+    const response = await api.post('/api/auth/login', form.value)
     authStore.setUser(response.data.user)
     router.push('/')
   } catch (err) {

@@ -22,7 +22,7 @@ export const useAuthStore = defineStore('auth', () => {
 })
 
 export const useBibleStore = defineStore('bible', () => {
-  const currentVersion = ref('KJV')
+  const currentVersion = ref('kjv')
   const currentBook = ref('')
   const currentChapter = ref(1)
   const chapterData = ref(null)

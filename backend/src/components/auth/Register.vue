@@ -99,7 +99,7 @@ const handleRegister = async () => {
   success.value = false
 
   try {
-    const response = await api.post('/auth/register', {
+    const response = await api.post('/api/auth/register', {
       username: form.value.username,
       email: form.value.email,
       password: form.value.password

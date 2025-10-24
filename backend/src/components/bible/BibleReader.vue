@@ -6,11 +6,11 @@
         <select
           id="version"
           v-model="bibleStore.currentVersion"
-          @change="loadVersions"
+          @change="onVersionChange"
           class="form-select"
         >
-          <option v-for="version in bibleStore.availableVersions" :key="version" :value="version">
-            {{ version.toUpperCase() }}
+          <option v-for="version in bibleStore.availableVersions" :key="version.id" :value="version.id">
+            {{ version.abbreviation }}
           </option>
         </select>
       </div>
@@ -59,8 +59,33 @@
           class="verse"
           :id="`verse-${verse.verse}`"
         >
-          <span class="verse-number">{{ verse.verse }}</span>
-          <span class="verse-text">{{ verse.text }}</span>
+          <div class="verse-content">
+            <span class="verse-number">{{ verse.verse }}</span>
+            <span class="verse-text">{{ verse.text }}</span>
+          </div>
+          <div class="verse-actions">
+            <button
+              @click="addNote(bibleStore.currentBook, bibleStore.currentChapter, verse.verse)"
+              class="action-btn note-btn"
+              title="Add Note"
+            >
+              📝
+            </button>
+            <button
+              @click="addBookmark(bibleStore.currentBook, bibleStore.currentChapter, verse.verse)"
+              class="action-btn bookmark-btn"
+              title="Add Bookmark"
+            >
+              🔖
+            </button>
+            <button
+              @click="addHighlight(bibleStore.currentBook, bibleStore.currentChapter, verse.verse)"
+              class="action-btn highlight-btn"
+              title="Add Highlight"
+            >
+              ✨
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -105,20 +130,32 @@ const maxChapters = computed(() => {
   return bookChapterCounts[bibleStore.currentBook] || 50
 })
 
+const onVersionChange = () => {
+  // Version change will trigger the watcher to reload chapter
+}
+
 const loadVersions = async () => {
   try {
     const response = await api.getVersions()
     bibleStore.setAvailableVersions(response.data)
+    // Set default version if not set
+    if (!bibleStore.currentVersion && response.data.length > 0) {
+      bibleStore.setVersion(response.data[0].id)
+    }
   } catch (error) {
     console.error('Failed to load versions:', error)
     // Fallback to hardcoded versions
-    bibleStore.setAvailableVersions([
-      { id: 'kjv', abbreviation: 'KJV' },
-      { id: 'esv', abbreviation: 'ESV' },
-      { id: 'niv', abbreviation: 'NIV' },
-      { id: 'nkjv', abbreviation: 'NKJV' },
-      { id: 'nlt', abbreviation: 'NLT' }
-    ])
+    const fallbackVersions = [
+      { id: 'kjv', name: 'King James Version', abbreviation: 'KJV' },
+      { id: 'esv', name: 'English Standard Version', abbreviation: 'ESV' },
+      { id: 'niv', name: 'New International Version', abbreviation: 'NIV' },
+      { id: 'nkjv', name: 'New King James Version', abbreviation: 'NKJV' },
+      { id: 'nlt', name: 'New Living Translation', abbreviation: 'NLT' }
+    ]
+    bibleStore.setAvailableVersions(fallbackVersions)
+    if (!bibleStore.currentVersion) {
+      bibleStore.setVersion('kjv')
+    }
   }
 }
 
@@ -132,6 +169,64 @@ const loadChapter = async () => {
     bibleStore.setChapterData(null)
   } finally {
     loading.value = false
+  }
+}
+
+// Study tool creation methods
+const addNote = async (book, chapter, verse) => {
+  const noteText = prompt(`Add a note for ${book} ${chapter}:${verse}:`)
+  if (noteText && noteText.trim()) {
+    try {
+      await api.post('/api/notes', {
+        book,
+        chapter,
+        verse,
+        note_text: noteText.trim()
+      })
+      alert('Note added successfully!')
+    } catch (error) {
+      console.error('Failed to add note:', error)
+      alert('Failed to add note. Please try again.')
+    }
+  }
+}
+
+const addBookmark = async (book, chapter, verse) => {
+  const title = prompt(`Add a bookmark title for ${book} ${chapter}:${verse} (optional):`)
+  try {
+    await api.post('/api/bookmarks', {
+      book,
+      chapter,
+      verse,
+      title: title ? title.trim() : ''
+    })
+    alert('Bookmark added successfully!')
+  } catch (error) {
+    console.error('Failed to add bookmark:', error)
+    alert('Failed to add bookmark. Please try again.')
+  }
+}
+
+const addHighlight = async (book, chapter, verse) => {
+  const colors = ['yellow', 'green', 'blue', 'pink', 'orange']
+  const colorChoice = prompt(`Choose highlight color for ${book} ${chapter}:${verse}:\n1. Yellow\n2. Green\n3. Blue\n4. Pink\n5. Orange\n\nEnter number (1-5):`)
+
+  const colorIndex = parseInt(colorChoice) - 1
+  if (colorChoice && colorIndex >= 0 && colorIndex < colors.length) {
+    try {
+      await api.post('/api/highlights', {
+        book,
+        chapter,
+        verse,
+        color: colors[colorIndex]
+      })
+      alert('Highlight added successfully!')
+    } catch (error) {
+      console.error('Failed to add highlight:', error)
+      alert('Failed to add highlight. Please try again.')
+    }
+  } else if (colorChoice) {
+    alert('Invalid choice. Please enter a number between 1-5.')
   }
 }
 
@@ -235,10 +330,17 @@ watch(() => bibleStore.currentChapter, loadChapter)
   margin-bottom: 1rem;
   padding: 0.5rem 0;
   border-bottom: 1px solid #f8f9fa;
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
 }
 
 .verse:last-child {
   border-bottom: none;
+}
+
+.verse-content {
+  flex: 1;
 }
 
 .verse-number {
@@ -250,5 +352,42 @@ watch(() => bibleStore.currentChapter, loadChapter)
 
 .verse-text {
   color: #2c3e50;
+}
+
+.verse-actions {
+  display: flex;
+  gap: 0.25rem;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.verse:hover .verse-actions {
+  opacity: 1;
+}
+
+.action-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 3px;
+  font-size: 1rem;
+  transition: background-color 0.2s;
+}
+
+.action-btn:hover {
+  background: rgba(0,0,0,0.1);
+}
+
+.note-btn:hover {
+  background: rgba(52, 152, 219, 0.2);
+}
+
+.bookmark-btn:hover {
+  background: rgba(155, 89, 182, 0.2);
+}
+
+.highlight-btn:hover {
+  background: rgba(46, 204, 113, 0.2);
 }
 </style>

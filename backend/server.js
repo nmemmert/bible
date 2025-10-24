@@ -12,13 +12,12 @@ const BibleLoader = require('./bible-loader');
 const bibleLoader = new BibleLoader();
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 12345;
 
 // Security middleware
 // app.use(helmet());
 app.use(cors({
-//   origin: process.env.FRONTEND_URL || 'http://localhost:3000',
-  origin: true,
+  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
   credentials: true
 }));
 
@@ -28,6 +27,9 @@ app.use(cors({
 // Body parsing
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Serve static files from the Vue build
+// app.use(express.static(path.join(__dirname, 'dist')));
 
 // Session configuration
 // app.use(session({
@@ -39,16 +41,13 @@ app.use(express.urlencoded({ extended: true }));
 //     httpOnly: true,
 //     maxAge: 24 * 60 * 60 * 1000 // 24 hours
 //   }
-// }));
-
-// Passport configuration
+// }));// Passport configuration
 // app.use(passport.initialize());
 // app.use(passport.session());
 
 // Database setup
 const dbPath = path.join(__dirname, 'bible_study.db');
 let db;
-/*
 try {
   db = new Database(dbPath);
 } catch (error) {
@@ -230,15 +229,24 @@ app.get('/api/health', (req, res) => {
 
 // Auth routes
 app.post('/api/auth/login', (req, res) => {
-  // Temporarily bypass authentication for testing
-  const { username } = req.body;
-  const stmt = db.prepare('SELECT * FROM users WHERE username = ?');
-  const user = stmt.get(username);
-  
-  if (user) {
+  try {
+    const { username, password } = req.body;
+    const stmt = db.prepare('SELECT * FROM users WHERE username = ?');
+    const user = stmt.get(username);
+
+    if (!user) {
+      return res.status(401).json({ error: 'Invalid username or password' });
+    }
+
+    // Check password
+    if (!bcrypt.compareSync(password, user.password_hash)) {
+      return res.status(401).json({ error: 'Invalid username or password' });
+    }
+
     res.json({ user: { id: user.id, username: user.username, email: user.email } });
-  } else {
-    res.status(401).json({ error: 'User not found' });
+  } catch (error) {
+    console.error('Login error:', error);
+    res.status(500).json({ error: 'Login failed' });
   }
 });
 
@@ -247,6 +255,7 @@ app.post('/api/auth/logout', (req, res) => {
 });
 
 app.get('/api/auth/user', (req, res) => {
+  console.log('Handling /api/auth/user');
   // Temporarily return a mock user for testing
   res.json({ user: { id: 1, username: 'testuser', email: 'test@example.com' } });
 });
@@ -426,27 +435,44 @@ app.get('/api/study-guides', requireAuth, (req, res) => {
   }
 });
 
-app.post('/api/study-guides', (req, res) => {
-  if (!req.isAuthenticated()) {
-    return res.status(401).json({ error: 'Not authenticated' });
-  }
-
+app.post('/api/study-guides', requireAuth, (req, res) => {
   try {
-    const { title, description, is_template, is_public } = req.body;
+    const { title, description, is_template, is_public, sections } = req.body;
     const stmt = db.prepare('INSERT INTO study_guides (user_id, title, description, is_template, is_public) VALUES (?, ?, ?, ?, ?)');
     const result = stmt.run(req.user.id, title, description, is_template || false, is_public || false);
-    res.status(201).json({ id: result.lastInsertRowid, message: 'Study guide created successfully' });
+    const guideId = result.lastInsertRowid;
+
+    // Create sections if provided
+    if (sections && Array.isArray(sections)) {
+      const sectionStmt = db.prepare(`
+        INSERT INTO study_guide_sections
+        (study_guide_id, title, content, order_index, section_type, book, chapter, verse_start, verse_end)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `);
+
+      sections.forEach((section, index) => {
+        sectionStmt.run(
+          guideId,
+          section.title || '',
+          section.content || '',
+          section.order_index || index,
+          section.section_type || 'text',
+          section.book || null,
+          section.chapter || null,
+          section.verse_start || null,
+          section.verse_end || null
+        );
+      });
+    }
+
+    res.status(201).json({ id: guideId, message: 'Study guide created successfully' });
   } catch (error) {
     console.error('Error creating study guide:', error);
     res.status(500).json({ error: 'Failed to create study guide' });
   }
 });
 
-app.get('/api/study-guides/:id', (req, res) => {
-  if (!req.isAuthenticated()) {
-    return res.status(401).json({ error: 'Not authenticated' });
-  }
-
+app.get('/api/study-guides/:id', requireAuth, (req, res) => {
   try {
     const stmt = db.prepare('SELECT * FROM study_guides WHERE id = ? AND (user_id = ? OR is_public = 1)');
     const studyGuide = stmt.get(req.params.id, req.user.id);
@@ -465,18 +491,45 @@ app.get('/api/study-guides/:id', (req, res) => {
   }
 });
 
-app.put('/api/study-guides/:id', (req, res) => {
-  if (!req.isAuthenticated()) {
-    return res.status(401).json({ error: 'Not authenticated' });
-  }
-
+app.put('/api/study-guides/:id', requireAuth, (req, res) => {
   try {
-    const { title, description, is_public } = req.body;
+    const { title, description, is_public, sections } = req.body;
+
+    // Update study guide
     const stmt = db.prepare('UPDATE study_guides SET title = ?, description = ?, is_public = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND user_id = ?');
     const result = stmt.run(title, description, is_public, req.params.id, req.user.id);
     if (result.changes === 0) {
       return res.status(404).json({ error: 'Study guide not found' });
     }
+
+    // Update sections if provided
+    if (sections && Array.isArray(sections)) {
+      // Delete existing sections
+      const deleteStmt = db.prepare('DELETE FROM study_guide_sections WHERE study_guide_id = ?');
+      deleteStmt.run(req.params.id);
+
+      // Insert new sections
+      const sectionStmt = db.prepare(`
+        INSERT INTO study_guide_sections
+        (study_guide_id, title, content, order_index, section_type, book, chapter, verse_start, verse_end)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `);
+
+      sections.forEach((section, index) => {
+        sectionStmt.run(
+          req.params.id,
+          section.title || '',
+          section.content || '',
+          section.order_index || index,
+          section.section_type || 'text',
+          section.book || null,
+          section.chapter || null,
+          section.verse_start || null,
+          section.verse_end || null
+        );
+      });
+    }
+
     res.json({ message: 'Study guide updated successfully' });
   } catch (error) {
     console.error('Error updating study guide:', error);
@@ -484,11 +537,7 @@ app.put('/api/study-guides/:id', (req, res) => {
   }
 });
 
-app.delete('/api/study-guides/:id', (req, res) => {
-  if (!req.isAuthenticated()) {
-    return res.status(401).json({ error: 'Not authenticated' });
-  }
-
+app.delete('/api/study-guides/:id', requireAuth, (req, res) => {
   try {
     const stmt = db.prepare('DELETE FROM study_guides WHERE id = ? AND user_id = ?');
     const result = stmt.run(req.params.id, req.user.id);
@@ -503,11 +552,7 @@ app.delete('/api/study-guides/:id', (req, res) => {
 });
 
 // Study Guide Sections routes
-app.post('/api/study-guides/:guideId/sections', (req, res) => {
-  if (!req.isAuthenticated()) {
-    return res.status(401).json({ error: 'Not authenticated' });
-  }
-
+app.post('/api/study-guides/:guideId/sections', requireAuth, (req, res) => {
   try {
     const { title, content, order_index, section_type, book, chapter, verse_start, verse_end } = req.body;
     const stmt = db.prepare(`
@@ -523,11 +568,7 @@ app.post('/api/study-guides/:guideId/sections', (req, res) => {
   }
 });
 
-app.put('/api/study-guide-sections/:id', (req, res) => {
-  if (!req.isAuthenticated()) {
-    return res.status(401).json({ error: 'Not authenticated' });
-  }
-
+app.put('/api/study-guide-sections/:id', requireAuth, (req, res) => {
   try {
     const { title, content, order_index } = req.body;
     const stmt = db.prepare('UPDATE study_guide_sections SET title = ?, content = ?, order_index = ? WHERE id = ?');
@@ -542,11 +583,7 @@ app.put('/api/study-guide-sections/:id', (req, res) => {
   }
 });
 
-app.delete('/api/study-guide-sections/:id', (req, res) => {
-  if (!req.isAuthenticated()) {
-    return res.status(401).json({ error: 'Not authenticated' });
-  }
-
+app.delete('/api/study-guide-sections/:id', requireAuth, (req, res) => {
   try {
     const stmt = db.prepare('DELETE FROM study_guide_sections WHERE id = ?');
     const result = stmt.run(req.params.id);
@@ -561,11 +598,7 @@ app.delete('/api/study-guide-sections/:id', (req, res) => {
 });
 
 // Word Studies routes
-app.get('/api/word-studies', (req, res) => {
-  if (!req.isAuthenticated()) {
-    return res.status(401).json({ error: 'Not authenticated' });
-  }
-
+app.get('/api/word-studies', requireAuth, (req, res) => {
   try {
     const stmt = db.prepare('SELECT * FROM word_studies WHERE user_id = ? ORDER BY created_at DESC');
     const wordStudies = stmt.all(req.user.id);
@@ -576,11 +609,7 @@ app.get('/api/word-studies', (req, res) => {
   }
 });
 
-app.post('/api/word-studies', (req, res) => {
-  if (!req.isAuthenticated()) {
-    return res.status(401).json({ error: 'Not authenticated' });
-  }
-
+app.post('/api/word-studies', requireAuth, (req, res) => {
   try {
     const { strongs_number, title, notes } = req.body;
     const stmt = db.prepare('INSERT INTO word_studies (user_id, strongs_number, title, notes) VALUES (?, ?, ?, ?)');
@@ -592,11 +621,7 @@ app.post('/api/word-studies', (req, res) => {
   }
 });
 
-app.put('/api/word-studies/:id', (req, res) => {
-  if (!req.isAuthenticated()) {
-    return res.status(401).json({ error: 'Not authenticated' });
-  }
-
+app.put('/api/word-studies/:id', requireAuth, (req, res) => {
   try {
     const { title, notes } = req.body;
     const stmt = db.prepare('UPDATE word_studies SET title = ?, notes = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND user_id = ?');
@@ -611,11 +636,7 @@ app.put('/api/word-studies/:id', (req, res) => {
   }
 });
 
-app.delete('/api/word-studies/:id', (req, res) => {
-  if (!req.isAuthenticated()) {
-    return res.status(401).json({ error: 'Not authenticated' });
-  }
-
+app.delete('/api/word-studies/:id', requireAuth, (req, res) => {
   try {
     const stmt = db.prepare('DELETE FROM word_studies WHERE id = ? AND user_id = ?');
     const result = stmt.run(req.params.id, req.user.id);
@@ -676,9 +697,9 @@ app.get('/api/lexicon', (req, res) => {
 // Bible Data Routes
 
 // Get available Bible versions
-app.get('/api/bible/versions', (req, res) => {
+app.get('/api/bible/versions', async (req, res) => {
   try {
-    const versions = bibleLoader.getAvailableVersions();
+    const versions = await bibleLoader.getAvailableVersions();
     res.json(versions);
   } catch (error) {
     console.error('Error fetching Bible versions:', error);
@@ -762,6 +783,11 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Something went wrong!' });
 });
 
+// Serve Vue app for all other routes (client-side routing)
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+});
+
 // 404 handler
 app.use((req, res) => {
   res.status(404).json({ error: 'Route not found' });
@@ -785,7 +811,6 @@ process.on('uncaughtException', (error) => {
 });
 
 process.on('SIGINT', () => {
-  console.log('Closing database connection...');
-  if (db) db.close();
+  console.log('Shutting down server...');
   process.exit(0);
 });

@@ -5,6 +5,8 @@ import Register from '../components/auth/Register.vue'
 import BibleReader from '../components/bible/BibleReader.vue'
 import BibleSearch from '../components/bible/BibleSearch.vue'
 import StudyTools from '../components/study/StudyTools.vue'
+import Lexicon from '../components/Lexicon.vue'
+import WordStudies from '../components/WordStudies.vue'
 
 const routes = [
   {
@@ -37,6 +39,16 @@ const routes = [
     path: '/study',
     name: 'StudyTools',
     component: StudyTools
+  },
+  {
+    path: '/lexicon',
+    name: 'Lexicon',
+    component: Lexicon
+  },
+  {
+    path: '/word-studies',
+    name: 'WordStudies',
+    component: WordStudies
   }
 ]
 

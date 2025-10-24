@@ -1,53 +1,127 @@
-# [Self-hosted Bible](https://github.com/samhaswon/selfhosted-bible)
-![An icon with the letters S, H, and B on a black background.](static/favicon.svg "Logo")
+# Bible Study Hub
 
-A self-hosted webapp of various Bible versions including the KJV, ESV, and ASV.
+A modern Bible study web application with Vue.js frontend and Express.js backend, featuring user authentication, study tools, and multiple Bible versions.
 
-## Supported Architectures
-| Architecture | Available | Tag    |
-|:------------:|:---------:|--------|
-|    x86-64    |     ✅     | latest |
-|   arm64v8    |     ✅     | latest |
-|   arm32v7    |     ✅     | latest |
-|   arm32v6    |     ✅     | latest |
-|     i386     |     ✅     | latest |
+## Features
 
-## Examples
-*Note: Screen shots taken in dark mode <br>
-### Home page
-![Home page image](pictures/home.jpg)
-### Single version reading
-![Example view of using a single version. The passage is Genesis chapter 1](pictures/single_version.jpg)
-### Split version reading
-![Example image of two versions side by side. The example is using the ESV and KJV for the passage Genesis chapter 1](pictures/split_version.jpg)
-### Search 
-![Example image of Bible searching functionality. The example is using the KJV as the version to be searched.](pictures/search.jpg)
-### Passage Grid
-![Example image of multiple passages being displayed simultaneously.](pictures/grid.jpg)
+- 📖 **Bible Reading**: Read from multiple Bible versions with easy navigation
+- 🔍 **Search**: Powerful search functionality across all versions
+- 📝 **Study Tools**: Notes, bookmarks, highlights, and study guides
+- 👤 **User Authentication**: Register and login to save your study materials
+- 🎨 **Modern UI**: Clean, responsive interface built with Vue.js
 
-# Instructions
+## Quick Start
 
-## Generating an API key for authorized ESV access (optional):
-To start, make an account at [esv.org](https://www.esv.org/). After creating an account at 
-[esv.org](https://www.esv.org/), create an API key at 
-[https://api.esv.org/account/create-application/](https://api.esv.org/account/create-application/). Then place the key 
-in [esv-api-key.txt](esv-api-key.txt) in place of "\<key-goes-here\>" for local installation or save the key for later 
-if running in Docker.
+### Option 1: Single Command (Recommended)
+```bash
+# Windows PowerShell
+./start.ps1
 
-## Running the application
-<details>
-    <summary>Locally</summary>
+# Linux/macOS
+./start.sh
+```
+*Note: On Windows, you may need to run `Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser` first to allow PowerShell scripts. On Linux/macOS, make sure the script is executable with `chmod +x start.sh`.*
 
-#### *Install Python 3*
-This application requires Python 3 to run. To install it on Windows, download and run the installer at 
-[python.org](https://www.python.org/downloads/). For Linux installation, you likely already have Python installed but 
-maybe not pip. In this case, install python3 (if not already installed) and py3-pip (or whatever the package name is for 
-Python 3 pip in your package manager) through your package manager. <br><br>
-Then, verify Python was installed by running `python3 --version` on Linux or `py -version` on Windows.
+### Option 2: Manual Start
+```bash
+# Terminal 1: Start the backend API
+cd backend
+npm install
+npm run dev
 
-For more detailed installation instructions, see [realpython.com](https://realpython.com/installing-python/).
+# Terminal 2: Start the frontend
+cd backend
+npm run dev:frontend
+```
 
-#### *Install requirements*
+### Option 3: Using npm scripts
+```bash
+cd backend
+npm install
+npm run dev:all  # Runs both frontend and backend concurrently
+```
+
+## Access the Application
+
+- **Frontend**: http://localhost:5173
+- **Backend API**: http://localhost:12345
+
+## User Guide
+
+### Getting Started
+1. **Register** a new account or **login** with existing credentials
+2. **Browse** the Bible by book and chapter
+3. **Search** for specific verses or keywords
+4. **Create study materials** directly from the reading interface
+
+### Study Tools
+- **📝 Notes**: Add personal reflections to specific verses
+- **🔖 Bookmarks**: Save important passages for quick access
+- **✨ Highlights**: Color-code verses (yellow, green, blue, pink, orange)
+- **📚 Study Guides**: Create structured study plans
+
+### Inline Study Tools
+You can create notes, bookmarks, and highlights directly while reading:
+- Hover over any verse to see action buttons
+- Click the buttons to quickly add study materials
+- All materials are saved to your personal study tools page
+
+## Development
+
+### Prerequisites
+- Node.js 16+
+- npm or yarn
+
+### Project Structure
+```
+bible/
+├── backend/           # Express.js API server
+│   ├── server.js      # Main server file
+│   ├── package.json   # Backend dependencies
+│   └── src/           # Frontend Vue.js app
+├── start.ps1          # Single-command startup script
+└── README.md          # This file
+```
+
+### Available Scripts
+```bash
+cd backend
+
+# Development
+npm run dev              # Start backend only
+npm run dev:frontend     # Start frontend only
+npm run dev:all          # Start both concurrently
+
+# Production
+npm run build:frontend   # Build frontend for production
+npm start               # Start production server
+```
+
+## API Endpoints
+
+- `GET /api/health` - Health check
+- `POST /api/auth/register` - User registration
+- `POST /api/auth/login` - User login
+- `GET /api/notes` - Get user notes
+- `POST /api/notes` - Create note
+- `GET /api/bookmarks` - Get user bookmarks
+- `POST /api/bookmarks` - Create bookmark
+- `GET /api/highlights` - Get user highlights
+- `POST /api/highlights` - Create highlight
+- `GET /api/study-guides` - Get user study guides
+- `POST /api/study-guides` - Create study guide
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
+
+## License
+
+ISC License - see LICENSE file for details.
 ```shell
 pip3 install -r requirements.txt
 ```

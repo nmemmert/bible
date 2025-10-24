@@ -37,15 +37,39 @@
           v-for="result in searchResults"
           :key="`${result.book}-${result.chapter}-${result.verse}`"
           class="result-item"
-          @click="goToVerse(result)"
         >
-          <div class="result-header">
-            <span class="result-reference">
-              {{ result.book }} {{ result.chapter }}:{{ result.verse }}
-              <span class="result-version">({{ selectedVersion || 'KJV' }})</span>
-            </span>
+          <div class="result-content" @click="goToVerse(result)">
+            <div class="result-header">
+              <span class="result-reference">
+                {{ result.book }} {{ result.chapter }}:{{ result.verse }}
+                <span class="result-version">({{ selectedVersion || 'KJV' }})</span>
+              </span>
+            </div>
+            <div class="result-text" v-html="highlightText(result.text, lastQuery)"></div>
           </div>
-          <div class="result-text" v-html="highlightText(result.text, lastQuery)"></div>
+          <div class="result-actions">
+            <button
+              @click.stop="addNote(result.book, result.chapter, result.verse)"
+              class="action-btn note-btn"
+              title="Add Note"
+            >
+              📝
+            </button>
+            <button
+              @click.stop="addBookmark(result.book, result.chapter, result.verse)"
+              class="action-btn bookmark-btn"
+              title="Add Bookmark"
+            >
+              🔖
+            </button>
+            <button
+              @click.stop="addHighlight(result.book, result.chapter, result.verse)"
+              class="action-btn highlight-btn"
+              title="Add Highlight"
+            >
+              ✨
+            </button>
+          </div>
         </div>
       </div>
 
@@ -159,6 +183,64 @@ const highlightText = (text, query) => {
   return text.replace(regex, '<mark>$1</mark>')
 }
 
+// Study tool creation methods
+const addNote = async (book, chapter, verse) => {
+  const noteText = prompt(`Add a note for ${book} ${chapter}:${verse}:`)
+  if (noteText && noteText.trim()) {
+    try {
+      await api.post('/api/notes', {
+        book,
+        chapter,
+        verse,
+        note_text: noteText.trim()
+      })
+      alert('Note added successfully!')
+    } catch (error) {
+      console.error('Failed to add note:', error)
+      alert('Failed to add note. Please try again.')
+    }
+  }
+}
+
+const addBookmark = async (book, chapter, verse) => {
+  const title = prompt(`Add a bookmark title for ${book} ${chapter}:${verse} (optional):`)
+  try {
+    await api.post('/api/bookmarks', {
+      book,
+      chapter,
+      verse,
+      title: title ? title.trim() : ''
+    })
+    alert('Bookmark added successfully!')
+  } catch (error) {
+    console.error('Failed to add bookmark:', error)
+    alert('Failed to add bookmark. Please try again.')
+  }
+}
+
+const addHighlight = async (book, chapter, verse) => {
+  const colors = ['yellow', 'green', 'blue', 'pink', 'orange']
+  const colorChoice = prompt(`Choose highlight color for ${book} ${chapter}:${verse}:\n1. Yellow\n2. Green\n3. Blue\n4. Pink\n5. Orange\n\nEnter number (1-5):`)
+
+  const colorIndex = parseInt(colorChoice) - 1
+  if (colorChoice && colorIndex >= 0 && colorIndex < colors.length) {
+    try {
+      await api.post('/api/highlights', {
+        book,
+        chapter,
+        verse,
+        color: colors[colorIndex]
+      })
+      alert('Highlight added successfully!')
+    } catch (error) {
+      console.error('Failed to add highlight:', error)
+      alert('Failed to add highlight. Please try again.')
+    }
+  } else if (colorChoice) {
+    alert('Invalid choice. Please enter a number between 1-5.')
+  }
+}
+
 onMounted(() => {
   loadVersions()
 })
@@ -263,7 +345,9 @@ onMounted(() => {
 .result-item {
   padding: 1rem 1.5rem;
   border-bottom: 1px solid #f8f9fa;
-  cursor: pointer;
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
   transition: background-color 0.2s;
 }
 
@@ -273,6 +357,48 @@ onMounted(() => {
 
 .result-item:last-child {
   border-bottom: none;
+}
+
+.result-content {
+  flex: 1;
+  cursor: pointer;
+}
+
+.result-actions {
+  display: flex;
+  gap: 0.25rem;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.result-item:hover .result-actions {
+  opacity: 1;
+}
+
+.action-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 3px;
+  font-size: 1rem;
+  transition: background-color 0.2s;
+}
+
+.action-btn:hover {
+  background: rgba(0,0,0,0.1);
+}
+
+.note-btn:hover {
+  background: rgba(52, 152, 219, 0.2);
+}
+
+.bookmark-btn:hover {
+  background: rgba(155, 89, 182, 0.2);
+}
+
+.highlight-btn:hover {
+  background: rgba(46, 204, 113, 0.2);
 }
 
 .result-header {

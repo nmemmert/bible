@@ -9,6 +9,8 @@
         <router-link to="/" class="nav-link">Home</router-link>
         <router-link to="/bible" class="nav-link">Bible</router-link>
         <router-link to="/search" class="nav-link">Search</router-link>
+        <router-link to="/lexicon" class="nav-link">Lexicon</router-link>
+        <router-link to="/word-studies" class="nav-link">Word Studies</router-link>
         <router-link to="/study" class="nav-link">Study Tools</router-link>
 
         <div v-if="authStore.isAuthenticated" class="nav-auth">
