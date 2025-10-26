@@ -17,6 +17,15 @@ COPY backend/ ./
 COPY *.pdf ./
 COPY pdf_resources.json ./
 
+# Build frontend
+COPY frontend/ ./frontend/
+WORKDIR /app/frontend
+RUN npm ci && npm run build
+WORKDIR /app
+
+# Copy built frontend to backend public directory
+RUN cp -r frontend/dist/* backend/public/
+
 # Create non-root user
 RUN addgroup -g 1001 -S nodejs && \
     adduser -S nodejs -u 1001
@@ -35,7 +44,7 @@ EXPOSE 8080
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD curl -f http://localhost:8080/api/health || exit 1
+  CMD curl -f http://localhost:8080/health || exit 1
 
 # Start the application
 CMD ["node", "server-pdf.js"]

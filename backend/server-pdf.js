@@ -6,8 +6,11 @@ const cors = require('cors');
 const app = express();
 const PORT = process.env.PORT || 8080;
 
-// Cache for PDF resources
-let pdfResources = null;
+// Enable CORS
+app.use(cors());
+
+// Serve static files from public directory (includes built frontend)
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Load PDF resources at startup
 function loadPdfResources() {
