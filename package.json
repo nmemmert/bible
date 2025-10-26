@@ -7,7 +7,12 @@
     "test": "tests"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "docker:build": "docker-compose -f docker-compose.nodejs.yml build",
+    "docker:up": "docker-compose -f docker-compose.nodejs.yml up -d",
+    "docker:down": "docker-compose -f docker-compose.nodejs.yml down",
+    "docker:logs": "docker-compose -f docker-compose.nodejs.yml logs -f",
+    "docker:dev": "docker-compose -f docker-compose.nodejs.yml up"
   },
   "repository": {
     "type": "git",
@@ -19,5 +24,12 @@
   "bugs": {
     "url": "https://github.com/nmemmert/bible/issues"
   },
-  "homepage": "https://github.com/nmemmert/bible#readme"
+  "homepage": "https://github.com/nmemmert/bible#readme",
+  "dependencies": {
+    "pdf-extract": "^1.0.11",
+    "pdf-parse": "^2.4.5",
+    "pdf-text-extract": "^1.5.0",
+    "pdf2text": "^1.1.0",
+    "pdfjs-dist": "^5.4.296"
+  }
 }

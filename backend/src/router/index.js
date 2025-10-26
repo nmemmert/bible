@@ -7,6 +7,7 @@ import BibleSearch from '../components/bible/BibleSearch.vue'
 import StudyTools from '../components/study/StudyTools.vue'
 import Lexicon from '../components/Lexicon.vue'
 import WordStudies from '../components/WordStudies.vue'
+import Resources from '../components/Resources.vue'
 
 const routes = [
   {
@@ -49,6 +50,11 @@ const routes = [
     path: '/word-studies',
     name: 'WordStudies',
     component: WordStudies
+  },
+  {
+    path: '/resources',
+    name: 'Resources',
+    component: Resources
   }
 ]
 
