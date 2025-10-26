@@ -1,5 +1,7 @@
 name: Docker Image CI
 
+# Build and push Docker image for Bible study app
+
 on:
   push:
     branches: [ "main", "rewrite" ]
