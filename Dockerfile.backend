@@ -23,7 +23,8 @@ WORKDIR /app/frontend
 RUN npm ci && npm run build
 WORKDIR /app
 
-# Copy built frontend to backend public directory
+# Create backend public directory and copy built frontend
+RUN mkdir -p backend/public
 RUN cp -r frontend/dist/* backend/public/
 
 # Create non-root user
