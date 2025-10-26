@@ -83,6 +83,37 @@ app.get('/health', (req, res) => {
   res.send('ok');
 });
 
+// Root route - serve API info
+app.get('/', (req, res) => {
+  res.send(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Bible Study Hub API</title>
+      <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        h1 { color: #333; }
+        ul { list-style-type: none; }
+        li { margin: 10px 0; }
+        a { color: #0066cc; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+      </style>
+    </head>
+    <body>
+      <h1>Bible Study Hub API</h1>
+      <p>Welcome to the Bible Study Hub API server.</p>
+      <h2>Available Endpoints:</h2>
+      <ul>
+        <li><a href="/api/resources">GET /api/resources</a> - List available PDF resources</li>
+        <li><a href="/resources/bsb_concordance.pdf">GET /resources/:filename</a> - Download PDF files</li>
+        <li><a href="/health">GET /health</a> - Health check</li>
+      </ul>
+      <p>Available PDFs: BSB Concordance, Greek NT (bib.pdf), Interlinear Bible (bgb.pdf)</p>
+    </body>
+    </html>
+  `);
+});
+
 console.log('About to start server');
 // loadPdfResources();
 app.listen(PORT, () => {
