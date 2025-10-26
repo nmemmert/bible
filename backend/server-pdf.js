@@ -119,6 +119,12 @@ app.get('/', (req, res) => {
 
 console.log('About to start server');
 // loadPdfResources();
+
+// SPA fallback - serve index.html for any unmatched routes (for frontend routing)
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
 app.listen(PORT, () => {
   console.log(`Bible Study Hub API server running on port ${PORT}`);
   console.log('Server is listening...');
