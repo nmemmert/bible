@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  backend:
+    image: ghcr.io/nmemmert/bible:latest
+    container_name: bible-backend
+    ports:
+      - "3000:8080"
+    volumes:
+      # Mount PDF files
+      - ./bsb_concordance.pdf:/app/bsb_concordance.pdf:ro
+      - ./bib.pdf:/app/bib.pdf:ro
+      - ./bgb.pdf:/app/bgb.pdf:ro
+      - ./pdf_resources.json:/app/pdf_resources.json:ro
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    networks:
+      - bible-network
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: bible-frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - bible-network
+
+networks:
+  bible-network:
+    driver: bridge
+
+volumes:
+  pdf-files:
+    driver: local

@@ -9,6 +9,7 @@ A modern Bible study web application with Vue.js frontend and Express.js backend
 - 📝 **Study Tools**: Notes, bookmarks, highlights, and study guides
 - 👤 **User Authentication**: Register and login to save your study materials
 - 🎨 **Modern UI**: Clean, responsive interface built with Vue.js
+- 📄 **PDF Resources**: Access to BSB Concordance, Greek NT, and Interlinear Bible
 
 ## Quick Start
 
@@ -34,17 +35,41 @@ cd backend
 npm run dev:frontend
 ```
 
-### Option 3: Using npm scripts
+### Option 4: Docker (Cross-platform, Recommended for Production)
 ```bash
-cd backend
-npm install
-npm run dev:all  # Runs both frontend and backend concurrently
+# Build and push to GitHub Container Registry
+./build-push.ps1
+
+# Or manually:
+docker build -f Dockerfile.backend -t ghcr.io/nmemmert/bible:latest .
+docker login ghcr.io -u nmemmert  # Use GitHub Personal Access Token
+docker push ghcr.io/nmemmert/bible:latest
+
+# Start the application
+docker-compose -f docker-compose.nodejs.yml up -d
+
+# View logs
+docker-compose -f docker-compose.nodejs.yml logs -f
+
+# Stop the application
+docker-compose -f docker-compose.nodejs.yml down
 ```
+
+**Access URLs:**
+- **Frontend**: http://localhost:8080
+- **Backend API**: http://localhost:3000
+
+**Docker Benefits:**
+- ✅ Works on Windows, macOS, and Linux
+- ✅ No Node.js installation required
+- ✅ Isolated environment
+- ✅ Easy deployment
+- ✅ Consistent runtime across platforms
 
 ## Access the Application
 
-- **Frontend**: http://localhost:5173
-- **Backend API**: http://localhost:12345
+- **Development**: http://localhost:5173 (frontend), http://localhost:12345 (API)
+- **Docker**: http://localhost:8080 (frontend), http://localhost:3000 (API)
 
 ## User Guide
 
@@ -60,11 +85,25 @@ npm run dev:all  # Runs both frontend and backend concurrently
 - **✨ Highlights**: Color-code verses (yellow, green, blue, pink, orange)
 - **📚 Study Guides**: Create structured study plans
 
-### Inline Study Tools
-You can create notes, bookmarks, and highlights directly while reading:
-- Hover over any verse to see action buttons
-- Click the buttons to quickly add study materials
-- All materials are saved to your personal study tools page
+### PDF Resources API
+Access study resources including:
+- **BSB Concordance**: Comprehensive concordance for Bible study
+- **Greek NT**: New Testament in original Greek
+- **Interlinear Bible**: Side-by-side Greek/English text
+
+**API Endpoints:**
+- `GET /api/resources` - List available PDF resources
+- `GET /resources/{filename}` - Download/view PDF files
+- `GET /health` - Health check endpoint
+
+Example usage:
+```bash
+# List resources
+curl http://localhost:8082/api/resources
+
+# Download a PDF
+curl http://localhost:8082/resources/bsb_concordance.pdf -o concordance.pdf
+```
 
 ## Development
 
