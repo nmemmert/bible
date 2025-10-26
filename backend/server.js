@@ -1,22 +1,66 @@
 const express = require('express');
-const session = require('express-session');
-const passport = require('passport');
-const LocalStrategy = require('passport-local').Strategy;
-const bcrypt = require('bcryptjs');
-const Database = require('better-sqlite3');
 const path = require('path');
+const fs = require('fs');
 const cors = require('cors');
-const helmet = require('helmet');
-const morgan = require('morgan');
-const BibleLoader = require('./bible-loader');
-const bibleLoader = new BibleLoader();
 
 const app = express();
-const PORT = process.env.PORT || 12345;
+const PORT = process.env.PORT || 3002;
 
-// Security middleware
-// app.use(helmet());
-app.use(cors({
+// Middleware
+app.use(cors());
+app.use(express.json());
+
+// PDF Resources API
+app.get('/api/resources', (req, res) => {
+  try {
+    const resourcesPath = path.join(__dirname, '..', 'pdf_resources.json');
+    const resources = JSON.parse(fs.readFileSync(resourcesPath, 'utf8'));
+    res.json(resources);
+  } catch (error) {
+    console.error('Error reading resources:', error);
+    res.status(500).json({ error: 'Failed to load resources' });
+  }
+});
+
+// Serve PDF files individually
+app.get('/resources/:filename', (req, res) => {
+  const filename = req.params.filename;
+  const allowedFiles = ['bsb_concordance.pdf', 'bib.pdf', 'bgb.pdf'];
+  
+  if (!allowedFiles.includes(filename)) {
+    return res.status(404).json({ error: 'File not found' });
+  }
+  
+  const filePath = path.join(__dirname, '..', filename);
+  
+  if (!fs.existsSync(filePath)) {
+    return res.status(404).json({ error: 'File not found' });
+  }
+  
+  res.setHeader('Content-Type', 'application/pdf');
+  res.setHeader('Content-Disposition', `inline; filename="${filename}"`);
+  
+  const fileStream = fs.createReadStream(filePath);
+  fileStream.pipe(res);
+});
+
+// Health check
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'healthy', timestamp: new Date().toISOString() });
+});
+
+// Test route
+app.get('/test', (req, res) => {
+  res.send('Server is running!');
+});
+
+console.log('About to start server...');
+app.listen(PORT, () => {
+  console.log(`Bible Study Hub API server running on port ${PORT}`);
+}).on('error', (err) => {
+  console.error('Server startup error:', err);
+  process.exit(1);
+});
   origin: process.env.FRONTEND_URL || 'http://localhost:5173',
   credentials: true
 }));
@@ -48,12 +92,12 @@ app.use(express.urlencoded({ extended: true }));
 // Database setup
 const dbPath = path.join(__dirname, 'bible_study.db');
 let db;
-try {
-  db = new Database(dbPath);
-} catch (error) {
-  console.error('Database connection error:', error);
-  process.exit(1);
-}
+// try {
+//   db = new Database(dbPath);
+// } catch (error) {
+//   console.error('Database connection error:', error);
+//   process.exit(1);
+// }
 
 // Create tables
 const createTables = () => {
@@ -177,13 +221,13 @@ const createTables = () => {
   `);
 };
 
-try {
-  createTables();
-  console.log('Database tables created successfully');
-} catch (error) {
-  console.error('Table creation error:', error);
-  process.exit(1);
-}
+// try {
+//   createTables();
+//   console.log('Database tables created successfully');
+// } catch (error) {
+//   console.error('Table creation error:', error);
+//   process.exit(1);
+// }
 
 // Passport Local Strategy
 passport.use(new LocalStrategy(
@@ -783,6 +827,31 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Something went wrong!' });
 });
 
+// Resources routes - serve PDF files
+app.get('/test', (req, res) => {
+  res.send('OK');
+});
+
+// Serve static files from the root directory
+// app.use('/resources', express.static(path.resolve(__dirname, '..')));
+
+// Serve PDF files individually
+app.get('/resources/:filename', (req, res) => {
+  const filename = req.params.filename;
+  const allowedFiles = ['bsb_concordance.pdf', 'bib.pdf', 'bgb.pdf'];
+
+  if (!allowedFiles.includes(filename)) {
+    return res.status(404).json({ error: 'Resource not found' });
+  }
+
+  const filePath = path.resolve(__dirname, '..', filename);
+  if (!fs.existsSync(filePath)) {
+    return res.status(404).json({ error: 'File not found' });
+  }
+
+  res.sendFile(filePath);
+});
+
 // Serve Vue app for all other routes (client-side routing)
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'dist', 'index.html'));
@@ -793,6 +862,7 @@ app.use((req, res) => {
   res.status(404).json({ error: 'Route not found' });
 });
 
+console.log('About to start server...');
 app.listen(PORT, () => {
   console.log(`Bible Study Hub API server running on port ${PORT}`);
 }).on('error', (err) => {

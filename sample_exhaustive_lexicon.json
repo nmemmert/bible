@@ -1,0 +1,806 @@
+{
+  "greek": [
+    {
+      "strongs_number": "G1",
+      "original_word": "Α",
+      "transliteration": "A",
+      "pronunciation": "al'-fah",
+      "part_of_speech": "noun",
+      "definition": "the first letter of the alphabet; figuratively, only (from its use as a numeral) first",
+      "usage": "Of Hebrew origin; the first letter of the alphabet; figuratively, only (from its use as a numeral) first: - Alpha.",
+      "language": "greek"
+    },
+    {
+      "strongs_number": "G2",
+      "original_word": "Ἀαρών",
+      "transliteration": "Aaron",
+      "pronunciation": "ah-ar-ohn'",
+      "part_of_speech": "proper noun",
+      "definition": "Aaron, the brother of Moses",
+      "usage": "Of Hebrew origin [Aharon]; Aaron, the brother of Moses: - Aaron.",
+      "language": "greek"
+    },
+    {
+      "strongs_number": "G3",
+      "original_word": "ἀββα",
+      "transliteration": "abba",
+      "pronunciation": "ab-bah'",
+      "part_of_speech": "noun",
+      "definition": "father (as a vocative case)",
+      "usage": "Of Chaldee origin [ab]; father (as a vocative case): - Abba.",
+      "language": "greek"
+    },
+    {
+      "strongs_number": "G4",
+      "original_word": "ἀβατός",
+      "transliteration": "abatos",
+      "pronunciation": "ab-at'-os",
+      "part_of_speech": "adjective",
+      "definition": "not to be trodden, i.e. impassable",
+      "usage": "From a (as a negative particle) and a derivative of baino; not to be trodden, i.e. impassable: - that cannot be trodden.",
+      "language": "greek"
+    },
+    {
+      "strongs_number": "G5",
+      "original_word": "Ἀββᾶ",
+      "transliteration": "Abba",
+      "pronunciation": "ab-bah'",
+      "part_of_speech": "proper noun",
+      "definition": "Abba, Father",
+      "usage": "Of Chaldee origin [ab]; father (as a vocative): - Abba.",
+      "language": "greek"
+    },
+    {
+      "strongs_number": "G6",
+      "original_word": "Ἀβδη",
+      "transliteration": "Abde",
+      "pronunciation": "ab-deh'",
+      "part_of_speech": "proper noun",
+      "definition": "Abde, an Israelite",
+      "usage": "Of Hebrew origin; Abde, an Israelite: - Abde.",
+      "language": "greek"
+    },
+    {
+      "strongs_number": "G7",
+      "original_word": "Ἀβδιού",
+      "transliteration": "Abdiu",
+      "pronunciation": "ab-dee-oo'",
+      "part_of_speech": "proper noun",
+      "definition": "Abdiu, an Israelite",
+      "usage": "Of Hebrew origin; Abdiu, an Israelite: - Abdiu.",
+      "language": "greek"
+    },
+    {
+      "strongs_number": "G8",
+      "original_word": "Ἀβιᾶ",
+      "transliteration": "Abia",
+      "pronunciation": "ab-ee-ah'",
+      "part_of_speech": "proper noun",
+      "definition": "Abia, an Israelite",
+      "usage": "Of Hebrew origin [Abiyah]; Abia, an Israelite: - Abia.",
+      "language": "greek"
+    },
+    {
+      "strongs_number": "G9",
+      "original_word": "Ἀβιαθάρ",
+      "transliteration": "Abiathar",
+      "pronunciation": "ab-ee-ath'-ar",
+      "part_of_speech": "proper noun",
+      "definition": "Abiathar, an Israelite",
+      "usage": "Of Hebrew origin [Ebyathar]; Abiathar, an Israelite: - Abiathar.",
+      "language": "greek"
+    },
+    {
+      "strongs_number": "G10",
+      "original_word": "Ἀβιληνή",
+      "transliteration": "Abilene",
+      "pronunciation": "ab-ee-lay-nay'",
+      "part_of_speech": "proper noun",
+      "definition": "Abilene, a region in Syria",
+      "usage": "Of foreign origin [compare Abil]; Abilene, a region in Syria: - Abilene.",
+      "language": "greek"
+    },
+    {
+      "strongs_number": "G11",
+      "original_word": "Ἀβιούδ",
+      "transliteration": "Abiud",
+      "pronunciation": "ab-ee-ood'",
+      "part_of_speech": "proper noun",
+      "definition": "Abiud, an Israelite",
+      "usage": "Of Hebrew origin [Abihud]; Abiud, an Israelite: - Abiud.",
+      "language": "greek"
+    },
+    {
+      "strongs_number": "G12",
+      "original_word": "ἄβυσσος",
+      "transliteration": "abussos",
+      "pronunciation": "ab'-us-sos",
+      "part_of_speech": "noun",
+      "definition": "depthless, i.e. (specially) (infernal) \"abyss\"",
+      "usage": "From a (as a negative particle) and a variation of bathus; depthless, i.e. (specially) (infernal) \"abyss\": - deep, (bottomless) pit.",
+      "language": "greek"
+    },
+    {
+      "strongs_number": "G13",
+      "original_word": "Ἀγάβος",
+      "transliteration": "Agabos",
+      "pronunciation": "ag'-ab-os",
+      "part_of_speech": "proper noun",
+      "definition": "Agabus, an Israelite",
+      "usage": "Of Hebrew origin [compare Agab]; Agabus, an Israelite: - Agabus.",
+      "language": "greek"
+    },
+    {
+      "strongs_number": "G14",
+      "original_word": "ἀγαθοεργέω",
+      "transliteration": "agathoergeo",
+      "pronunciation": "ag-ath-er-geo'-o",
+      "part_of_speech": "verb",
+      "definition": "to work good",
+      "usage": "From agathos and the base of ergon; to work good: - do good.",
+      "language": "greek"
+    },
+    {
+      "strongs_number": "G15",
+      "original_word": "ἀγαθοποιέω",
+      "transliteration": "agathopoieo",
+      "pronunciation": "ag-ath-op-oy-eh'-o",
+      "part_of_speech": "verb",
+      "definition": "to be a well-doer (as a favor or a duty)",
+      "usage": "From agathopoios; to be a well-doer (as a favor or a duty): - (when) do good (well).",
+      "language": "greek"
+    },
+    {
+      "strongs_number": "G16",
+      "original_word": "ἀγαθοποιία",
+      "transliteration": "agathopoia",
+      "pronunciation": "ag-ath-op-oy-ee'-ah",
+      "part_of_speech": "noun",
+      "definition": "well-doing, i.e. virtue",
+      "usage": "From agathopoios; well-doing, i.e. virtue: - well-doing.",
+      "language": "greek"
+    },
+    {
+      "strongs_number": "G17",
+      "original_word": "ἀγαθοποιός",
+      "transliteration": "agathopoios",
+      "pronunciation": "ag-ath-op-oy-os'",
+      "part_of_speech": "adjective",
+      "definition": "a well-doer, i.e. virtuous",
+      "usage": "From agathos and poieo; a well-doer, i.e. virtuous: - them that do well.",
+      "language": "greek"
+    },
+    {
+      "strongs_number": "G18",
+      "original_word": "ἀγαθός",
+      "transliteration": "agathos",
+      "pronunciation": "ag-ath-os'",
+      "part_of_speech": "adjective",
+      "definition": "good (in any sense, often as a noun)",
+      "usage": "A primary word; \"good\" (in any sense, often as a noun): - benefit, good(-s, things), well.",
+      "language": "greek"
+    },
+    {
+      "strongs_number": "G19",
+      "original_word": "ἀγαθωσύνη",
+      "transliteration": "agathosune",
+      "pronunciation": "ag-ath-o-soo'-nay",
+      "part_of_speech": "noun",
+      "definition": "goodness, i.e. virtue or beneficence",
+      "usage": "From agathos; goodness, i.e. virtue or beneficence: - goodness.",
+      "language": "greek"
+    },
+    {
+      "strongs_number": "G20",
+      "original_word": "ἀγαλλίασις",
+      "transliteration": "agalliasis",
+      "pronunciation": "ag-al-lee'-as-is",
+      "part_of_speech": "noun",
+      "definition": "exultation; specially, welcome",
+      "usage": "From agalliao; exultation; specially, welcome: - gladness, (exceeding) joy.",
+      "language": "greek"
+    },
+    {
+      "strongs_number": "G21",
+      "original_word": "ἀγαλλιάω",
+      "transliteration": "agalliao",
+      "pronunciation": "ag-al-lee-ah'-o",
+      "part_of_speech": "verb",
+      "definition": "to jump for joy, i.e. exult",
+      "usage": "From agan (much) and hallomai (to leap); properly, to jump for joy, i.e. exult: - be (exceeding) glad, with exceeding joy, rejoice (greatly).",
+      "language": "greek"
+    },
+    {
+      "strongs_number": "G22",
+      "original_word": "ἄγαμος",
+      "transliteration": "agamos",
+      "pronunciation": "ag'-am-os",
+      "part_of_speech": "adjective",
+      "definition": "unmarried",
+      "usage": "From a (as a negative particle) and gamos; unmarried: - unmarried.",
+      "language": "greek"
+    },
+    {
+      "strongs_number": "G23",
+      "original_word": "ἀγανακτέω",
+      "transliteration": "aganakteo",
+      "pronunciation": "ag-an-ak-teh'-o",
+      "part_of_speech": "verb",
+      "definition": "to be greatly afflicted, i.e. (figuratively) indignant",
+      "usage": "From agan (much) and achthos (grief; akin to the base of agkale); to be greatly afflicted, i.e. (figuratively) indignant: - be much (sore) displeased, have (be moved with, with) indignation.",
+      "language": "greek"
+    },
+    {
+      "strongs_number": "G24",
+      "original_word": "ἀγανάκτησις",
+      "transliteration": "aganaktesis",
+      "pronunciation": "ag-an-ak'-tay-sis",
+      "part_of_speech": "noun",
+      "definition": "indignation",
+      "usage": "From aganakteo; indignation: - indignation.",
+      "language": "greek"
+    },
+    {
+      "strongs_number": "G25",
+      "original_word": "ἀγαπάω",
+      "transliteration": "agapao",
+      "pronunciation": "ag-ap-ah'-o",
+      "part_of_speech": "verb",
+      "definition": "to love (in a social or moral sense)",
+      "usage": "From agape; to love (in a social or moral sense): - (be-) love(-ed).",
+      "language": "greek"
+    },
+    {
+      "strongs_number": "G26",
+      "original_word": "ἀγάπη",
+      "transliteration": "agape",
+      "pronunciation": "ag-ah'-pay",
+      "part_of_speech": "noun",
+      "definition": "love, i.e. affection or benevolence; specially (plural) a love-feast",
+      "usage": "From agapao; love, i.e. affection or benevolence; specially (plural) a love-feast: - (feast of) charity(-ably), dear, love.",
+      "language": "greek"
+    },
+    {
+      "strongs_number": "G27",
+      "original_word": "ἀγαπητός",
+      "transliteration": "agapetos",
+      "pronunciation": "ag-ap-ay-tos'",
+      "part_of_speech": "adjective",
+      "definition": "beloved",
+      "usage": "From agapao; beloved: - (dearly, well) beloved, dear.",
+      "language": "greek"
+    },
+    {
+      "strongs_number": "G28",
+      "original_word": "Ἀγαρ",
+      "transliteration": "Agar",
+      "pronunciation": "ag'-ar",
+      "part_of_speech": "proper noun",
+      "definition": "Hagar, the concubine of Abraham",
+      "usage": "Of Hebrew origin [Hagar]; Hagar, the concubine of Abraham: - Hagar.",
+      "language": "greek"
+    },
+    {
+      "strongs_number": "G29",
+      "original_word": "ἀγγαρεύω",
+      "transliteration": "aggareuo",
+      "pronunciation": "ang-ar-yew'-o",
+      "part_of_speech": "verb",
+      "definition": "to be a courier, i.e. (by implication) to press into public service",
+      "usage": "Of foreign origin [compare aggar]; to be a courier, i.e. (by implication) to press into public service: - compel (to go) unto, press.",
+      "language": "greek"
+    },
+    {
+      "strongs_number": "G30",
+      "original_word": "ἀγγεῖον",
+      "transliteration": "angeion",
+      "pronunciation": "ang-eye'-on",
+      "part_of_speech": "noun",
+      "definition": "a receptacle",
+      "usage": "From aggos (a pail, perhaps as bent; compare the base of agkale); a receptacle: - vessel.",
+      "language": "greek"
+    },
+    {
+      "strongs_number": "G31",
+      "original_word": "ἀγγελία",
+      "transliteration": "angelia",
+      "pronunciation": "ang-el-ee'-ah",
+      "part_of_speech": "noun",
+      "definition": "an announcement, i.e. (by implication) precept",
+      "usage": "From agello; an announcement, i.e. (by implication) precept: - message.",
+      "language": "greek"
+    },
+    {
+      "strongs_number": "G32",
+      "original_word": "ἄγγελος",
+      "transliteration": "angelos",
+      "pronunciation": "ang'-el-os",
+      "part_of_speech": "noun",
+      "definition": "a messenger; especially an \"angel\"; by implication, a pastor",
+      "usage": "From aggello [probably derived from agoo; compare agele] (to bring tidings); a messenger; especially an \"angel\"; by implication, a pastor: - angel, messenger.",
+      "language": "greek"
+    },
+    {
+      "strongs_number": "G33",
+      "original_word": "ἀγέλη",
+      "transliteration": "agele",
+      "pronunciation": "ag-el'-ay",
+      "part_of_speech": "noun",
+      "definition": "a drove",
+      "usage": "From agoo (compare agele); a drove: - herd.",
+      "language": "greek"
+    },
+    {
+      "strongs_number": "G34",
+      "original_word": "ἀγένητος",
+      "transliteration": "agenetos",
+      "pronunciation": "ag-en'-ay-tos",
+      "part_of_speech": "adjective",
+      "definition": "unborn, i.e. in perpetual infancy",
+      "usage": "From a (as negative particle) and genetos (born); unborn, i.e. in perpetual infancy: - unbegotten.",
+      "language": "greek"
+    },
+    {
+      "strongs_number": "G35",
+      "original_word": "ἀγενεαλόγητος",
+      "transliteration": "agenealogetos",
+      "pronunciation": "ag-en-eh-al-og'-ay-tos",
+      "part_of_speech": "adjective",
+      "definition": "unregistered as to genealogy",
+      "usage": "From a (as negative particle) and genealogeo; unregistered as to genealogy: - without genealogy.",
+      "language": "greek"
+    },
+    {
+      "strongs_number": "G36",
+      "original_word": "ἀγενής",
+      "transliteration": "agenes",
+      "pronunciation": "ag-en-ace'",
+      "part_of_speech": "adjective",
+      "definition": "properly, without kin, i.e. (of unknown descent, and by implication) ignoble",
+      "usage": "From a (as negative particle) and genos; properly, without kin, i.e. (of unknown descent, and by implication) ignoble: - base things.",
+      "language": "greek"
+    },
+    {
+      "strongs_number": "G37",
+      "original_word": "ἁγιάζω",
+      "transliteration": "hagiazō",
+      "pronunciation": "hag-ee-ad'-zo",
+      "part_of_speech": "verb",
+      "definition": "to make holy, i.e. (ceremonially) purify or consecrate; (mentally) to venerate",
+      "usage": "From hagios; to make holy, i.e. (ceremonially) purify or consecrate; (mentally) to venerate: - hallow, be holy, sanctify.",
+      "language": "greek"
+    },
+    {
+      "strongs_number": "G38",
+      "original_word": "ἁγιασμός",
+      "transliteration": "hagiasmos",
+      "pronunciation": "hag-ee-as-mos'",
+      "part_of_speech": "noun",
+      "definition": "purification, i.e. (the state) purity; concretely (by Hebraism) a purifier",
+      "usage": "From hagiazō; purification, i.e. (the state) purity; concretely (by Hebraism) a purifier: - holiness, sanctification.",
+      "language": "greek"
+    },
+    {
+      "strongs_number": "G39",
+      "original_word": "ἅγιος",
+      "transliteration": "hagios",
+      "pronunciation": "hag'-ee-os",
+      "part_of_speech": "adjective",
+      "definition": "sacred (physically, pure, morally blameless or religious, ceremonially, consecrated)",
+      "usage": "From hagos (an awful thing) [compare agno, hagnos]; sacred (physically, pure, morally blameless or religious, ceremonially, consecrated): - (most) holy (one, thing), saint.",
+      "language": "greek"
+    },
+    {
+      "strongs_number": "G40",
+      "original_word": "ἅγιος",
+      "transliteration": "hagios",
+      "pronunciation": "hag'-ee-os",
+      "part_of_speech": "adjective",
+      "definition": "sacred (physically, pure, morally blameless or religious, ceremonially, consecrated)",
+      "usage": "From hagos (an awful thing) [compare agno, hagnos]; sacred (physically, pure, morally blameless or religious, ceremonially, consecrated): - (most) holy (one, thing), saint.",
+      "language": "greek"
+    }
+  ],
+  "hebrew": [
+    {
+      "strongs_number": "H1",
+      "original_word": "אָב",
+      "transliteration": "ab",
+      "pronunciation": "awb",
+      "part_of_speech": "noun",
+      "definition": "father, in a literal and immediate, or figurative and remote application",
+      "usage": "A primitive word; father, in a literal and immediate, or figurative and remote application): - chief, (fore-)father(-less), X patrimony, principal.",
+      "language": "hebrew"
+    },
+    {
+      "strongs_number": "H2",
+      "original_word": "אַב",
+      "transliteration": "ab",
+      "pronunciation": "ab",
+      "part_of_speech": "noun",
+      "definition": "father, in a literal and immediate, or figurative and remote application",
+      "usage": "A primitive word; father, in a literal and immediate, or figurative and remote application): - chief, (fore-)father(-less), X patrimony, principal.",
+      "language": "hebrew"
+    },
+    {
+      "strongs_number": "H3",
+      "original_word": "אֵב",
+      "transliteration": "eb",
+      "pronunciation": "abe",
+      "part_of_speech": "noun",
+      "definition": "a green plant",
+      "usage": "From the same as 'ab; a green plant: - greenness, fruit.",
+      "language": "hebrew"
+    },
+    {
+      "strongs_number": "H4",
+      "original_word": "אֵב",
+      "transliteration": "eb",
+      "pronunciation": "abe",
+      "part_of_speech": "noun",
+      "definition": "fruit (in a wide sense)",
+      "usage": "From the same as 'ab; fruit (in a wide sense): - fruit.",
+      "language": "hebrew"
+    },
+    {
+      "strongs_number": "H5",
+      "original_word": "אֲבַגְתָא",
+      "transliteration": "Abagtha",
+      "pronunciation": "ab-ag-thaw'",
+      "part_of_speech": "proper noun",
+      "definition": "Abagtha, one of the seven eunuchs of Ahasuerus",
+      "usage": "Of foreign origin; Abagtha, one of the seven eunuchs of Ahasuerus: - Abagtha.",
+      "language": "hebrew"
+    },
+    {
+      "strongs_number": "H6",
+      "original_word": "אָבַד",
+      "transliteration": "abad",
+      "pronunciation": "aw-bad'",
+      "part_of_speech": "verb",
+      "definition": "properly, to wander away, i.e. lose oneself; by implication to perish (causative, destroy)",
+      "usage": "A primitive root; properly, to wander away, i.e. lose oneself; by implication to perish (causative, destroy): - break, destroy(-uction), + not escape, fail, lose, (cause to, make) perish, spend, X and surely, take, be undone, X utterly, be void of, have no way to flee.",
+      "language": "hebrew"
+    },
+    {
+      "strongs_number": "H7",
+      "original_word": "אֲבַדּוֹן",
+      "transliteration": "Abaddon",
+      "pronunciation": "ab-ad-done'",
+      "part_of_speech": "proper noun",
+      "definition": "Abaddon, an Israelite",
+      "usage": "Of Hebrew origin; Abaddon, an Israelite: - Abaddon.",
+      "language": "hebrew"
+    },
+    {
+      "strongs_number": "H8",
+      "original_word": "אֹבֵד",
+      "transliteration": "obed",
+      "pronunciation": "o-bade'",
+      "part_of_speech": "noun",
+      "definition": "ruin, destruction",
+      "usage": "Active of abad; a perishing; ruin: - destruction.",
+      "language": "hebrew"
+    },
+    {
+      "strongs_number": "H9",
+      "original_word": "אֲבֵדָה",
+      "transliteration": "abedah",
+      "pronunciation": "ab-ay-daw'",
+      "part_of_speech": "noun",
+      "definition": "concrete, something lost; abstract, destruction, i.e. Hades",
+      "usage": "From abad; concrete, something lost; abstract, destruction, i.e. Hades: - lost. Compare abaddon.",
+      "language": "hebrew"
+    },
+    {
+      "strongs_number": "H10",
+      "original_word": "אֲבָגְתָא",
+      "transliteration": "Abagtha",
+      "pronunciation": "ab-ag-thaw'",
+      "part_of_speech": "proper noun",
+      "definition": "Abagtha, one of the seven eunuchs of Ahasuerus",
+      "usage": "Of foreign origin; Abagtha, one of the seven eunuchs of Ahasuerus: - Abagtha.",
+      "language": "hebrew"
+    },
+    {
+      "strongs_number": "H11",
+      "original_word": "אֲבַדּוֹן",
+      "transliteration": "Abaddon",
+      "pronunciation": "ab-ad-done'",
+      "part_of_speech": "proper noun",
+      "definition": "Abaddon, an Israelite",
+      "usage": "Of Hebrew origin; Abaddon, an Israelite: - Abaddon.",
+      "language": "hebrew"
+    },
+    {
+      "strongs_number": "H12",
+      "original_word": "אַבְדָן",
+      "transliteration": "abdan",
+      "pronunciation": "ab-dawn'",
+      "part_of_speech": "noun",
+      "definition": "a perishing",
+      "usage": "From abad; a perishing: - destruction.",
+      "language": "hebrew"
+    },
+    {
+      "strongs_number": "H13",
+      "original_word": "אָבְדָן",
+      "transliteration": "obdan",
+      "pronunciation": "ob-dawn'",
+      "part_of_speech": "noun",
+      "definition": "a perishing; concretely, Hades",
+      "usage": "From abad; a perishing; concretely, Hades: - destruction.",
+      "language": "hebrew"
+    },
+    {
+      "strongs_number": "H14",
+      "original_word": "אָבָה",
+      "transliteration": "abah",
+      "pronunciation": "aw-baw'",
+      "part_of_speech": "verb",
+      "definition": "to breathe after, i.e. (figuratively) to crave",
+      "usage": "A primitive root; to breathe after, i.e. (figuratively) to crave: - desire.",
+      "language": "hebrew"
+    },
+    {
+      "strongs_number": "H15",
+      "original_word": "אָבֶה",
+      "transliteration": "abeh",
+      "pronunciation": "aw-beh'",
+      "part_of_speech": "noun",
+      "definition": "want",
+      "usage": "From abah; want: - desire.",
+      "language": "hebrew"
+    },
+    {
+      "strongs_number": "H16",
+      "original_word": "אֵבֶה",
+      "transliteration": "ebeh",
+      "pronunciation": "ay-beh'",
+      "part_of_speech": "noun",
+      "definition": "ebah, a species of gall-insect",
+      "usage": "From an unused root (meaning to be yellow); ebeh, a species of gall-insect: - ebah.",
+      "language": "hebrew"
+    },
+    {
+      "strongs_number": "H17",
+      "original_word": "אֲבַיִם",
+      "transliteration": "Abayim",
+      "pronunciation": "ab-ah'-yim",
+      "part_of_speech": "proper noun",
+      "definition": "Abajim, an Israelite",
+      "usage": "Dual of a primitive word; Abajim, an Israelite: - Abajim.",
+      "language": "hebrew"
+    },
+    {
+      "strongs_number": "H18",
+      "original_word": "אֵבוּס",
+      "transliteration": "ebus",
+      "pronunciation": "ay-booce'",
+      "part_of_speech": "noun",
+      "definition": "a manger or stall",
+      "usage": "From the same as 'ab; a manger or stall: - crib.",
+      "language": "hebrew"
+    },
+    {
+      "strongs_number": "H19",
+      "original_word": "אִבְחָה",
+      "transliteration": "ibchah",
+      "pronunciation": "ib-khaw'",
+      "part_of_speech": "noun",
+      "definition": "an outburst of passion",
+      "usage": "From an unused root (apparently meaning to turn); an outburst of passion: - rage.",
+      "language": "hebrew"
+    },
+    {
+      "strongs_number": "H20",
+      "original_word": "אִבְחָה",
+      "transliteration": "ibchah",
+      "pronunciation": "ib-khaw'",
+      "part_of_speech": "noun",
+      "definition": "an outburst of passion",
+      "usage": "From an unused root (apparently meaning to turn); an outburst of passion: - rage.",
+      "language": "hebrew"
+    },
+    {
+      "strongs_number": "H21",
+      "original_word": "אֲבִי",
+      "transliteration": "Abi",
+      "pronunciation": "ab-ee'",
+      "part_of_speech": "proper noun",
+      "definition": "Abi, Hezekiah's mother",
+      "usage": "From 'ab; fatherly; Abi, Hezekiah's mother: - Abi.",
+      "language": "hebrew"
+    },
+    {
+      "strongs_number": "H22",
+      "original_word": "אֲבִיאֵל",
+      "transliteration": "Abiel",
+      "pronunciation": "ab-ee-ale'",
+      "part_of_speech": "proper noun",
+      "definition": "Abiel, the name of two Israelites",
+      "usage": "From 'ab and 'el; father (i.e. source) of God; Abiel, the name of two Israelites: - Abiel.",
+      "language": "hebrew"
+    },
+    {
+      "strongs_number": "H23",
+      "original_word": "אֲבִיאָסָף",
+      "transliteration": "Abiasaph",
+      "pronunciation": "ab-ee-aw-sawf'",
+      "part_of_speech": "proper noun",
+      "definition": "Abiasaph, an Israelite",
+      "usage": "From 'ab and 'acaph; father of gathering (i.e. gatherer); Abiasaph, an Israelite: - Abiasaph.",
+      "language": "hebrew"
+    },
+    {
+      "strongs_number": "H24",
+      "original_word": "אָבִיב",
+      "transliteration": "abib",
+      "pronunciation": "aw-beeb'",
+      "part_of_speech": "noun",
+      "definition": "green, i.e. a young ear of grain; hence, the name of the month Abib or Nisan",
+      "usage": "From an unused root (meaning to be tender); green, i.e. a young ear of grain; hence, the name of the month Abib or Nisan: - Abib, ear, green ears of corn (not maize).",
+      "language": "hebrew"
+    },
+    {
+      "strongs_number": "H25",
+      "original_word": "אֲבִי גִבְעוֹן",
+      "transliteration": "Abi Gibon",
+      "pronunciation": "ab-ee' ghib-one'",
+      "part_of_speech": "proper noun",
+      "definition": "Abi-Gibon, perhaps an Israelite",
+      "usage": "From 'ab and Gibon; father (i.e. founder) of Gibon; Abi-Gibon, perhaps an Israelite: - father of Gibeon.",
+      "language": "hebrew"
+    },
+    {
+      "strongs_number": "H26",
+      "original_word": "אֲבִיגַיִל",
+      "transliteration": "Abigal",
+      "pronunciation": "ab-ee-gal'",
+      "part_of_speech": "proper noun",
+      "definition": "Abigal or Abigail, the name of two Israelitesses",
+      "usage": "Feminine of 'ab and gil; father of joy; Abigail or Abigal, the name of two Israelitesses: - Abigail.",
+      "language": "hebrew"
+    },
+    {
+      "strongs_number": "H27",
+      "original_word": "אֲבִידָן",
+      "transliteration": "Abidan",
+      "pronunciation": "ab-ee-dawn'",
+      "part_of_speech": "proper noun",
+      "definition": "Abidan, an Israelite",
+      "usage": "From 'ab and dan; father of judgment; Abidan, an Israelite: - Abidan.",
+      "language": "hebrew"
+    },
+    {
+      "strongs_number": "H28",
+      "original_word": "אֲבִידָן",
+      "transliteration": "Abidan",
+      "pronunciation": "ab-ee-dawn'",
+      "part_of_speech": "proper noun",
+      "definition": "Abidan, an Israelite",
+      "usage": "From 'ab and dan; father of judgment; Abidan, an Israelite: - Abidan.",
+      "language": "hebrew"
+    },
+    {
+      "strongs_number": "H29",
+      "original_word": "אֲבִיָּה",
+      "transliteration": "Abiyah",
+      "pronunciation": "ab-ee-yaw'",
+      "part_of_speech": "proper noun",
+      "definition": "Abiah, the name of two Israelites",
+      "usage": "From 'ab and Yahh; father of (i.e. worshipper of) Jah; Abijah, the name of several Israelites: - Abiah, Abijah.",
+      "language": "hebrew"
+    },
+    {
+      "strongs_number": "H30",
+      "original_word": "אֲבִיָּהוּא",
+      "transliteration": "Abihu",
+      "pronunciation": "ab-ee-hoo'",
+      "part_of_speech": "proper noun",
+      "definition": "Abihu, a son of Aaron",
+      "usage": "From 'ab and hu'; father of him (i.e. worshipper); Abihu, a son of Aaron: - Abihu.",
+      "language": "hebrew"
+    },
+    {
+      "strongs_number": "H31",
+      "original_word": "אֲבִיָּהוּד",
+      "transliteration": "Abihud",
+      "pronunciation": "ab-ee-hood'",
+      "part_of_speech": "proper noun",
+      "definition": "Abihud, an Israelite",
+      "usage": "From 'ab and hod; father of renown; Abihud, an Israelite: - Abihud.",
+      "language": "hebrew"
+    },
+    {
+      "strongs_number": "H32",
+      "original_word": "אֲבִיָּהַיִל",
+      "transliteration": "Abihail",
+      "pronunciation": "ab-ee-hah'-yil",
+      "part_of_speech": "proper noun",
+      "definition": "Abihail, the name of three Israelites",
+      "usage": "From 'ab and chayil; father of might; Abihail or Abichail, the name of three Israelites: - Abihail.",
+      "language": "hebrew"
+    },
+    {
+      "strongs_number": "H33",
+      "original_word": "אֲבִי הָעֶזְרִי",
+      "transliteration": "Abi ha-Ezri",
+      "pronunciation": "ab-ee' haw-ez-ree'",
+      "part_of_speech": "proper noun",
+      "definition": "Abi-ha-Ezri, an Israelite",
+      "usage": "From 'ab and the active participle of azar with the article interposed; father of the help; Abi-ha-Ezri, an Israelite: - Abi-ezrite.",
+      "language": "hebrew"
+    },
+    {
+      "strongs_number": "H34",
+      "original_word": "אֲבִיּוֹנָה",
+      "transliteration": "Abiyon",
+      "pronunciation": "ab-ee-yone'",
+      "part_of_speech": "proper noun",
+      "definition": "Abiyon, an Israelite",
+      "usage": "From 'ab and yoneh; father of poverty (i.e. unfortunate); Abiyon, an Israelite: - Abion.",
+      "language": "hebrew"
+    },
+    {
+      "strongs_number": "H35",
+      "original_word": "אֲבִיּוֹנִי",
+      "transliteration": "Abiyoni",
+      "pronunciation": "ab-ee-yo-nee'",
+      "part_of_speech": "proper noun",
+      "definition": "Abiyoni, an Israelite",
+      "usage": "Patronymic from Abiyon; an Abionite or descendant of Abion: - Abionite.",
+      "language": "hebrew"
+    },
+    {
+      "strongs_number": "H36",
+      "original_word": "אֲבִיּוֹנִים",
+      "transliteration": "Abiynom",
+      "pronunciation": "ab-ee-no'-me",
+      "part_of_speech": "proper noun",
+      "definition": "Abinoam, an Israelite",
+      "usage": "From 'ab and noam; father of pleasantness (i.e. gracious); Abinoam, an Israelite: - Abinoam.",
+      "language": "hebrew"
+    },
+    {
+      "strongs_number": "H37",
+      "original_word": "אֲבִי עַלְבוֹן",
+      "transliteration": "Abi Albon",
+      "pronunciation": "ab-ee' al-bone'",
+      "part_of_speech": "proper noun",
+      "definition": "Abi-Albon, an Israelite",
+      "usage": "From 'ab and 'Albon with the article inserted; father of Albon; Abi-Albon, an Israelite: - Abi-albon.",
+      "language": "hebrew"
+    },
+    {
+      "strongs_number": "H38",
+      "original_word": "אֲבִי עָשָׁן",
+      "transliteration": "Abi Ashan",
+      "pronunciation": "ab-ee' aw-shawn'",
+      "part_of_speech": "proper noun",
+      "definition": "Abi-Ashan, an Israelite",
+      "usage": "From 'ab and 'Ashan; father of Ashan; Abi-Ashan, an Israelite: - Abi-ashan.",
+      "language": "hebrew"
+    },
+    {
+      "strongs_number": "H39",
+      "original_word": "אֲבִי עֶזֶר",
+      "transliteration": "Abi Ezer",
+      "pronunciation": "ab-ee' eh'-zer",
+      "part_of_speech": "proper noun",
+      "definition": "Abi-Ezer, an Israelite",
+      "usage": "From 'ab and ezer; father of help (i.e. helpful); Abi-Ezer, an Israelite: - Abi-ezer.",
+      "language": "hebrew"
+    },
+    {
+      "strongs_number": "H40",
+      "original_word": "אֲבִיעֶזֶר",
+      "transliteration": "Abiezer",
+      "pronunciation": "ab-ee-ay'-zer",
+      "part_of_speech": "proper noun",
+      "definition": "Abiezer, the name of two Israelites",
+      "usage": "From 'ab and ezer; father of help (i.e. helpful); Abiezer, the name of two Israelites: - Abiezer.",
+      "language": "hebrew"
+    }
+  ]
+}
