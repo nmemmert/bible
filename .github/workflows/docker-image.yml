@@ -34,4 +34,4 @@ jobs:
           docker buildx build --push \
             --tag ghcr.io/nmemmert/bible:latest \
             --file Dockerfile.backend \
-            --platform linux/arm/v6,linux/arm/v7,linux/arm64/v8,linux/amd64 .
+            --platform linux/amd64 .
