@@ -2,6 +2,7 @@ name: Docker Image CI
 
 # Build and push Docker image for Bible study app
 # Updated: Using GITHUB_TOKEN with workflow permissions
+# updated: permissions
 
 on:
   push:
