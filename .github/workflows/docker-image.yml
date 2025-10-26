@@ -1,6 +1,7 @@
 name: Docker Image CI
 
 # Build and push Docker image for Bible study app
+# Updated: Removed linux/386 platform support
 
 on:
   push:
