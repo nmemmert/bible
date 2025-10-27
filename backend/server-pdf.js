@@ -203,6 +203,27 @@ app.get('/api/study-guides', (req, res) => {
   res.json([]);
 });
 
+// POST endpoints for creating data
+app.post('/api/notes', (req, res) => {
+  // For now, just acknowledge the request
+  res.json({ success: true, message: 'Note created' });
+});
+
+app.post('/api/bookmarks', (req, res) => {
+  // For now, just acknowledge the request
+  res.json({ success: true, message: 'Bookmark created' });
+});
+
+app.post('/api/highlights', (req, res) => {
+  // For now, just acknowledge the request
+  res.json({ success: true, message: 'Highlight created' });
+});
+
+app.post('/api/word-studies', (req, res) => {
+  // For now, just acknowledge the request
+  res.json({ success: true, message: 'Word study created' });
+});
+
 // Serve PDF files individually
 app.get('/resources/:filename', (req, res) => {
   const filename = req.params.filename;
