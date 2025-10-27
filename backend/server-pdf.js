@@ -75,10 +75,10 @@ app.get('/api/lexicon', (req, res) => {
       const lexiconData = JSON.parse(data);
       // Combine greek and hebrew entries into a single entries array
       const entries = [];
-      if (lexiconData.greek) entries.push(...lexiconData.greek);
-      if (lexiconData.hebrew) entries.push(...lexiconData.hebrew);
+      if (lexiconData.greek) entries.push(...lexiconData.greek.slice(0, 100)); // Limit to first 100 for testing
+      if (lexiconData.hebrew) entries.push(...lexiconData.hebrew.slice(0, 100)); // Limit to first 100 for testing
       
-      console.log(`Lexicon data parsed, ${entries.length} entries, sending response`);
+      console.log(`Lexicon data parsed, ${entries.length} entries (limited), sending response`);
       res.json({ entries });
     } catch (parseError) {
       console.error('Error parsing lexicon JSON:', parseError);
