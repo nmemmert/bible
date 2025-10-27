@@ -10,7 +10,7 @@ const PORT = process.env.PORT || 8080;
 app.use(cors());
 
 // Serve static files from public directory (includes built frontend)
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(process.cwd(), 'backend', 'public')));
 
 // Load PDF resources at startup
 function loadPdfResources() {
@@ -88,16 +88,11 @@ app.get('/health', (req, res) => {
 
 // SPA fallback - serve index.html for any unmatched routes (for frontend routing)
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  res.sendFile(path.join(process.cwd(), 'backend', 'public', 'index.html'));
 });
 
 console.log('About to start server');
 // loadPdfResources();
-
-// SPA fallback - serve index.html for any unmatched routes (for frontend routing)
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
 
 app.listen(PORT, () => {
   console.log(`Bible Study Hub API server running on port ${PORT}`);
