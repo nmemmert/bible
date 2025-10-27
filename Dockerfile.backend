@@ -15,7 +15,7 @@ COPY backend/ ./
 
 # Build frontend (Vue.js app in backend/src)
 RUN npm ci
-RUN npm run build
+RUN npm run build:frontend
 
 # Move built files to backend/public for serving
 RUN mkdir -p backend/public
