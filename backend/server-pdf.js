@@ -61,13 +61,25 @@ app.get('/api/resources', (req, res) => {
 
 // Lexicon API - serve Strong's data
 app.get('/api/lexicon', (req, res) => {
-  try {
-    const lexiconData = require('./strongs-complete.json');
-    res.json(lexiconData);
-  } catch (error) {
-    console.error('Error loading lexicon:', error);
-    res.status(500).json({ error: 'Failed to load lexicon data' });
-  }
+  console.log('Lexicon API called');
+  const fs = require('fs');
+  const path = require('path');
+  
+  fs.readFile(path.join(__dirname, 'strongs-complete.json'), 'utf8', (err, data) => {
+    if (err) {
+      console.error('Error reading lexicon file:', err);
+      return res.status(500).json({ error: 'Failed to read lexicon file' });
+    }
+    
+    try {
+      const lexiconData = JSON.parse(data);
+      console.log('Lexicon data parsed, sending response');
+      res.json(lexiconData);
+    } catch (parseError) {
+      console.error('Error parsing lexicon JSON:', parseError);
+      res.status(500).json({ error: 'Failed to parse lexicon data' });
+    }
+  });
 });
 
 // Word Study API - search lexicon by Strong's number
@@ -94,6 +106,29 @@ app.get('/api/word-study/:strongs', (req, res) => {
     console.error('Error in word study:', error);
     res.status(500).json({ error: 'Failed to search lexicon' });
   }
+});
+
+// Word Studies API - return all word studies or search
+app.get('/api/word-studies', (req, res) => {
+  console.log('Word Studies API called');
+  const fs = require('fs');
+  const path = require('path');
+  
+  fs.readFile(path.join(__dirname, 'strongs-complete.json'), 'utf8', (err, data) => {
+    if (err) {
+      console.error('Error reading lexicon file:', err);
+      return res.status(500).json({ error: 'Failed to read lexicon file' });
+    }
+    
+    try {
+      const lexiconData = JSON.parse(data);
+      console.log('Word studies data parsed, sending response');
+      res.json(lexiconData);
+    } catch (parseError) {
+      console.error('Error parsing lexicon JSON:', parseError);
+      res.status(500).json({ error: 'Failed to parse lexicon data' });
+    }
+  });
 });
 
 // Serve PDF files individually
