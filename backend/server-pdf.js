@@ -90,17 +90,8 @@ app.get('/api/lexicon', (req, res) => {
       
       console.log(`Lexicon data parsed, ${totalEntries} total entries, returning page ${page} of ${totalPages} (${paginatedEntries.length} entries)`);
       
-      res.json({
-        entries: paginatedEntries,
-        pagination: {
-          currentPage: page,
-          totalPages: totalPages,
-          totalEntries: totalEntries,
-          entriesPerPage: limit,
-          hasNextPage: page < totalPages,
-          hasPrevPage: page > 1
-        }
-      });
+      // Return just the entries array for compatibility with frontend
+      res.json(paginatedEntries);
     } catch (parseError) {
       console.error('Error parsing lexicon JSON:', parseError);
       res.status(500).json({ error: 'Failed to parse lexicon data' });
@@ -208,17 +199,8 @@ app.get('/api/word-studies', (req, res) => {
       
       console.log(`Word studies data parsed, ${totalEntries} total entries, returning page ${page} of ${totalPages} (${paginatedEntries.length} entries)`);
       
-      res.json({
-        entries: paginatedEntries,
-        pagination: {
-          currentPage: page,
-          totalPages: totalPages,
-          totalEntries: totalEntries,
-          entriesPerPage: limit,
-          hasNextPage: page < totalPages,
-          hasPrevPage: page > 1
-        }
-      });
+      // Return just the entries array for compatibility with frontend
+      res.json(paginatedEntries);
     } catch (parseError) {
       console.error('Error parsing lexicon JSON:', parseError);
       res.status(500).json({ error: 'Failed to parse lexicon data' });
