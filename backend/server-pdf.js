@@ -73,8 +73,56 @@ app.get('/api/lexicon', (req, res) => {
     
     try {
       const lexiconData = JSON.parse(data);
-      console.log('Lexicon data parsed, sending response');
-      res.json(lexiconData);
+      // Combine greek and hebrew entries into a single entries array
+      const entries = [];
+      if (lexiconData.greek) entries.push(...lexiconData.greek);
+      if (lexiconData.hebrew) entries.push(...lexiconData.hebrew);
+      
+      console.log(`Lexicon data parsed, ${entries.length} entries, sending response`);
+      res.json({ entries });
+    } catch (parseError) {
+      console.error('Error parsing lexicon JSON:', parseError);
+      res.status(500).json({ error: 'Failed to parse lexicon data' });
+    }
+  });
+});
+
+// Individual lexicon entry API
+app.get('/api/lexicon/:id', (req, res) => {
+  const entryId = req.params.id;
+  console.log(`Lexicon entry API called for: ${entryId}`);
+  
+  if (!entryId || entryId === 'undefined') {
+    return res.status(400).json({ error: 'Invalid entry ID' });
+  }
+  
+  const fs = require('fs');
+  const path = require('path');
+  
+  fs.readFile(path.join(__dirname, 'strongs-complete.json'), 'utf8', (err, data) => {
+    if (err) {
+      console.error('Error reading lexicon file:', err);
+      return res.status(500).json({ error: 'Failed to read lexicon file' });
+    }
+    
+    try {
+      const lexiconData = JSON.parse(data);
+      const strongsNumber = entryId.toUpperCase();
+      
+      // Search in Greek and Hebrew
+      let entry = null;
+      if (lexiconData.greek) {
+        entry = lexiconData.greek.find(e => e.strongs_number === strongsNumber);
+      }
+      if (!entry && lexiconData.hebrew) {
+        entry = lexiconData.hebrew.find(e => e.strongs_number === strongsNumber);
+      }
+      
+      if (entry) {
+        res.json(entry);
+      } else {
+        res.status(404).json({ error: 'Lexicon entry not found' });
+      }
     } catch (parseError) {
       console.error('Error parsing lexicon JSON:', parseError);
       res.status(500).json({ error: 'Failed to parse lexicon data' });
