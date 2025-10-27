@@ -131,6 +131,30 @@ app.get('/api/word-studies', (req, res) => {
   });
 });
 
+// Notes API
+app.get('/api/notes', (req, res) => {
+  // Return empty array for now - can be expanded later
+  res.json([]);
+});
+
+// Bookmarks API
+app.get('/api/bookmarks', (req, res) => {
+  // Return empty array for now - can be expanded later
+  res.json([]);
+});
+
+// Highlights API
+app.get('/api/highlights', (req, res) => {
+  // Return empty array for now - can be expanded later
+  res.json([]);
+});
+
+// Study Guides API
+app.get('/api/study-guides', (req, res) => {
+  // Return empty array for now - can be expanded later
+  res.json([]);
+});
+
 // Serve PDF files individually
 app.get('/resources/:filename', (req, res) => {
   const filename = req.params.filename;
