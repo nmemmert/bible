@@ -59,11 +59,16 @@ app.get('/api/resources', (req, res) => {
   ]);
 });
 
-// Lexicon API - serve Strong's data
+// Lexicon API - serve Strong's data with pagination
 app.get('/api/lexicon', (req, res) => {
   console.log('Lexicon API called');
   const fs = require('fs');
   const path = require('path');
+  
+  // Parse pagination parameters
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 100;
+  const offset = (page - 1) * limit;
   
   fs.readFile(path.join(__dirname, 'strongs-complete.json'), 'utf8', (err, data) => {
     if (err) {
@@ -74,12 +79,28 @@ app.get('/api/lexicon', (req, res) => {
     try {
       const lexiconData = JSON.parse(data);
       // Combine greek and hebrew entries into a single entries array
-      const entries = [];
-      if (lexiconData.greek) entries.push(...lexiconData.greek.slice(0, 100)); // Limit to first 100 for testing
-      if (lexiconData.hebrew) entries.push(...lexiconData.hebrew.slice(0, 100)); // Limit to first 100 for testing
+      const allEntries = [];
+      if (lexiconData.greek) allEntries.push(...lexiconData.greek);
+      if (lexiconData.hebrew) allEntries.push(...lexiconData.hebrew);
       
-      console.log(`Lexicon data parsed, ${entries.length} entries (limited), sending response`);
-      res.json({ entries });
+      // Apply pagination
+      const totalEntries = allEntries.length;
+      const paginatedEntries = allEntries.slice(offset, offset + limit);
+      const totalPages = Math.ceil(totalEntries / limit);
+      
+      console.log(`Lexicon data parsed, ${totalEntries} total entries, returning page ${page} of ${totalPages} (${paginatedEntries.length} entries)`);
+      
+      res.json({
+        entries: paginatedEntries,
+        pagination: {
+          currentPage: page,
+          totalPages: totalPages,
+          totalEntries: totalEntries,
+          entriesPerPage: limit,
+          hasNextPage: page < totalPages,
+          hasPrevPage: page > 1
+        }
+      });
     } catch (parseError) {
       console.error('Error parsing lexicon JSON:', parseError);
       res.status(500).json({ error: 'Failed to parse lexicon data' });
@@ -162,6 +183,11 @@ app.get('/api/word-studies', (req, res) => {
   const fs = require('fs');
   const path = require('path');
   
+  // Parse pagination parameters
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 100;
+  const offset = (page - 1) * limit;
+  
   fs.readFile(path.join(__dirname, 'strongs-complete.json'), 'utf8', (err, data) => {
     if (err) {
       console.error('Error reading lexicon file:', err);
@@ -170,8 +196,29 @@ app.get('/api/word-studies', (req, res) => {
     
     try {
       const lexiconData = JSON.parse(data);
-      console.log('Word studies data parsed, sending response');
-      res.json(lexiconData);
+      // Combine greek and hebrew entries into a single entries array
+      const allEntries = [];
+      if (lexiconData.greek) allEntries.push(...lexiconData.greek);
+      if (lexiconData.hebrew) allEntries.push(...lexiconData.hebrew);
+      
+      // Apply pagination
+      const totalEntries = allEntries.length;
+      const paginatedEntries = allEntries.slice(offset, offset + limit);
+      const totalPages = Math.ceil(totalEntries / limit);
+      
+      console.log(`Word studies data parsed, ${totalEntries} total entries, returning page ${page} of ${totalPages} (${paginatedEntries.length} entries)`);
+      
+      res.json({
+        entries: paginatedEntries,
+        pagination: {
+          currentPage: page,
+          totalPages: totalPages,
+          totalEntries: totalEntries,
+          entriesPerPage: limit,
+          hasNextPage: page < totalPages,
+          hasPrevPage: page > 1
+        }
+      });
     } catch (parseError) {
       console.error('Error parsing lexicon JSON:', parseError);
       res.status(500).json({ error: 'Failed to parse lexicon data' });
