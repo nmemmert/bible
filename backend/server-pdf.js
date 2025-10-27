@@ -59,6 +59,43 @@ app.get('/api/resources', (req, res) => {
   ]);
 });
 
+// Lexicon API - serve Strong's data
+app.get('/api/lexicon', (req, res) => {
+  try {
+    const lexiconData = require('./strongs-complete.json');
+    res.json(lexiconData);
+  } catch (error) {
+    console.error('Error loading lexicon:', error);
+    res.status(500).json({ error: 'Failed to load lexicon data' });
+  }
+});
+
+// Word Study API - search lexicon by Strong's number
+app.get('/api/word-study/:strongs', (req, res) => {
+  try {
+    const lexiconData = require('./strongs-complete.json');
+    const strongsNumber = req.params.strongs.toUpperCase();
+    
+    // Search in Greek and Hebrew
+    let result = null;
+    if (lexiconData.greek) {
+      result = lexiconData.greek.find(entry => entry.strongs_number === strongsNumber);
+    }
+    if (!result && lexiconData.hebrew) {
+      result = lexiconData.hebrew.find(entry => entry.strongs_number === strongsNumber);
+    }
+    
+    if (result) {
+      res.json(result);
+    } else {
+      res.status(404).json({ error: 'Word not found' });
+    }
+  } catch (error) {
+    console.error('Error in word study:', error);
+    res.status(500).json({ error: 'Failed to search lexicon' });
+  }
+});
+
 // Serve PDF files individually
 app.get('/resources/:filename', (req, res) => {
   const filename = req.params.filename;
