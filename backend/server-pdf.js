@@ -86,6 +86,11 @@ app.get('/health', (req, res) => {
   res.send('ok');
 });
 
+// Catch-all for unknown API routes - return JSON error instead of HTML
+app.get('/api/*', (req, res) => {
+  res.status(404).json({ error: 'API endpoint not found' });
+});
+
 // SPA fallback - serve index.html for any unmatched routes (for frontend routing)
 app.get('*', (req, res) => {
   res.sendFile(path.join(process.cwd(), 'backend', 'public', 'index.html'));
