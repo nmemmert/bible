@@ -284,6 +284,13 @@ export default {
       }
 
       return filtered
+    },
+
+    canUpload() {
+      return this.selectedFile &&
+             this.uploadTitle.trim() &&
+             this.uploadDescription.trim() &&
+             !this.uploadLoading
     }
   },
   methods: {
@@ -377,13 +384,6 @@ export default {
       if (this.$refs.pdfFileInput) {
         this.$refs.pdfFileInput.value = ''
       }
-    },
-
-    get canUpload() {
-      return this.selectedFile &&
-             this.uploadTitle.trim() &&
-             this.uploadDescription.trim() &&
-             !this.uploadLoading
     },
 
     async uploadResource() {
