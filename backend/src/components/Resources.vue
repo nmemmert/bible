@@ -6,6 +6,92 @@
       <p>Access additional Bible study materials and reference works. Search through the extracted text content of these resources.</p>
     </div>
 
+    <!-- Upload Section -->
+    <div class="upload-section">
+      <div class="upload-header">
+        <button @click="showUploadSection = !showUploadSection" class="btn-secondary toggle-btn">
+          {{ showUploadSection ? '📁 Hide Upload Form' : '📤 Upload New Resource' }}
+        </button>
+      </div>
+
+      <div v-if="showUploadSection" class="upload-form">
+        <div class="form-group">
+          <label for="pdfFile">Select PDF File:</label>
+          <input
+            type="file"
+            id="pdfFile"
+            ref="pdfFileInput"
+            accept=".pdf"
+            @change="handleFileSelect"
+            class="file-input"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="resourceTitle">Title:</label>
+          <input
+            v-model="uploadTitle"
+            type="text"
+            id="resourceTitle"
+            placeholder="Enter resource title..."
+            class="text-input"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="resourceDescription">Description:</label>
+          <textarea
+            v-model="uploadDescription"
+            id="resourceDescription"
+            placeholder="Enter resource description..."
+            class="text-area"
+          ></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="resourceType">Type:</label>
+          <select v-model="uploadType" id="resourceType" class="select-input">
+            <option value="concordance">Concordance</option>
+            <option value="bible_text">Bible Text</option>
+            <option value="interlinear">Interlinear</option>
+            <option value="commentary">Commentary</option>
+            <option value="study_guide">Study Guide</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+
+        <div class="upload-actions">
+          <button
+            @click="uploadResource"
+            :disabled="!canUpload"
+            class="btn-primary"
+          >
+            {{ uploadLoading ? 'Uploading...' : '📤 Upload Resource' }}
+          </button>
+          <button
+            @click="clearUploadForm"
+            class="btn-secondary"
+          >
+            Clear
+          </button>
+        </div>
+
+        <div v-if="uploadProgress > 0" class="upload-progress">
+          <div class="progress-bar">
+            <div
+              class="progress-fill"
+              :style="{ width: uploadProgress + '%' }"
+            ></div>
+          </div>
+          <span>{{ uploadProgress }}% complete</span>
+        </div>
+
+        <div v-if="uploadMessage" class="upload-message" :class="uploadMessageType">
+          {{ uploadMessage }}
+        </div>
+      </div>
+    </div>
+
     <!-- Search Section -->
     <div class="search-section">
       <div class="search-controls">
@@ -85,6 +171,13 @@
           </div>
 
           <div class="resource-actions">
+            <button
+              @click="findVerses(resource)"
+              :disabled="verseLoading"
+              class="btn-secondary"
+            >
+              {{ verseLoading ? '🔍 Searching...' : '🔍 Find Verses' }}
+            </button>
             <a
               :href="resource.downloadUrl"
               download
@@ -93,6 +186,26 @@
             >
               ⬇️ Download PDF
             </a>
+          </div>
+
+          <!-- Verse Results -->
+          <div v-if="verseSearchAttempted && selectedResourceForVerses === resource.filename" class="verse-results">
+            <h4>Verse Results</h4>
+            <div v-if="verseResults.length === 0" class="no-verses">
+              <p>No verses found containing this word.</p>
+            </div>
+            <div v-else class="verses-list">
+              <div
+                v-for="(result, index) in verseResults"
+                :key="index"
+                class="verse-item"
+              >
+                <div class="verse-reference">
+                  <strong>{{ result.book }} {{ result.chapter }}:{{ result.verse }}</strong>
+                </div>
+                <div class="verse-text" v-html="highlightText(result.text, result.query)"></div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -130,6 +243,21 @@ export default {
       searchQuery: '',
       resourceFilter: '',
       viewingContent: new Set(), // Track which resources have content displayed
+      showUploadSection: false, // Track if upload section is expanded
+      // Upload related data
+      selectedFile: null,
+      uploadTitle: '',
+      uploadDescription: '',
+      uploadType: 'concordance',
+      uploadLoading: false,
+      uploadProgress: 0,
+      uploadMessage: '',
+      uploadMessageType: '',
+      // Find verses related data
+      verseLoading: false,
+      verseResults: [],
+      verseSearchAttempted: false,
+      selectedResourceForVerses: null
     }
   },
   async mounted() {
@@ -218,6 +346,134 @@ export default {
       const decodedText = text.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#39;/g, "'")
       // Limit display to first 2000 characters to avoid overwhelming the UI
       return decodedText.length > 2000 ? decodedText.substring(0, 2000) + '...' : decodedText
+    },
+
+    // Upload methods
+    handleFileSelect(event) {
+      const file = event.target.files[0]
+      if (file && file.type === 'application/pdf') {
+        this.selectedFile = file
+        // Auto-fill title if empty
+        if (!this.uploadTitle.trim()) {
+          this.uploadTitle = file.name.replace('.pdf', '')
+        }
+      } else {
+        this.selectedFile = null
+        this.uploadMessage = 'Please select a valid PDF file.'
+        this.uploadMessageType = 'error'
+        setTimeout(() => {
+          this.uploadMessage = ''
+        }, 3000)
+      }
+    },
+
+    clearUploadForm() {
+      this.selectedFile = null
+      this.uploadTitle = ''
+      this.uploadDescription = ''
+      this.uploadType = 'concordance'
+      this.uploadProgress = 0
+      this.uploadMessage = ''
+      if (this.$refs.pdfFileInput) {
+        this.$refs.pdfFileInput.value = ''
+      }
+    },
+
+    get canUpload() {
+      return this.selectedFile &&
+             this.uploadTitle.trim() &&
+             this.uploadDescription.trim() &&
+             !this.uploadLoading
+    },
+
+    async uploadResource() {
+      if (!this.canUpload) return
+
+      try {
+        this.uploadLoading = true
+        this.uploadProgress = 0
+        this.uploadMessage = ''
+
+        const formData = new FormData()
+        formData.append('pdf', this.selectedFile)
+        formData.append('title', this.uploadTitle.trim())
+        formData.append('description', this.uploadDescription.trim())
+        formData.append('type', this.uploadType)
+
+        const response = await fetch('/api/resources/upload', {
+          method: 'POST',
+          headers: {
+            ...this.getAuthHeaders()
+          },
+          body: formData
+        })
+
+        if (!response.ok) {
+          const errorData = await response.json()
+          throw new Error(errorData.error || 'Upload failed')
+        }
+
+        const result = await response.json()
+
+        this.uploadMessage = 'Resource uploaded successfully!'
+        this.uploadMessageType = 'success'
+        this.clearUploadForm()
+
+        // Reload resources to show the new one
+        await this.loadResources()
+
+      } catch (error) {
+        console.error('Upload error:', error)
+        this.uploadMessage = error.message || 'Upload failed. Please try again.'
+        this.uploadMessageType = 'error'
+      } finally {
+        this.uploadLoading = false
+        this.uploadProgress = 0
+      }
+    },
+
+    async findVerses(resource) {
+      try {
+        this.verseLoading = true
+        this.verseSearchAttempted = false
+        this.selectedResourceForVerses = resource.filename
+
+        // Get the search query from the search input
+        const query = this.searchQuery.trim()
+        if (!query) {
+          this.verseResults = []
+          this.verseSearchAttempted = true
+          return
+        }
+
+        // Search in the resource's text file
+        const response = await fetch(`/api/bible/search-text?q=${encodeURIComponent(query)}&file=${resource.filename}.txt`)
+
+        if (!response.ok) {
+          throw new Error('Failed to search for verses')
+        }
+
+        const results = await response.json()
+        // Add the query to each result for highlighting
+        this.verseResults = (results || []).map(result => ({ ...result, query }))
+        this.verseSearchAttempted = true
+
+        console.log(`Found ${this.verseResults.length} verses for "${query}" in ${resource.filename}`)
+      } catch (error) {
+        console.error('Error finding verses:', error)
+        this.verseResults = []
+        this.verseSearchAttempted = true
+      } finally {
+        this.verseLoading = false
+      }
+    },
+
+    highlightText(text, searchTerm) {
+      if (!searchTerm) return text
+
+      // Simple case-insensitive highlighting
+      const regex = new RegExp(`(${searchTerm})`, 'gi')
+      return text.replace(regex, '<mark>$1</mark>')
     }
   }
 }
@@ -236,6 +492,110 @@ export default {
   border-radius: 8px;
   margin-bottom: 30px;
   text-align: center;
+}
+
+.upload-section {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 30px;
+}
+
+.upload-header {
+  margin-bottom: 15px;
+}
+
+.toggle-btn {
+  width: 100%;
+  padding: 12px;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.2s;
+}
+
+.toggle-btn:hover {
+  background: #0056b3;
+}
+
+.upload-section h2 {
+  margin-top: 0;
+  color: #333;
+}
+
+.upload-form {
+  display: grid;
+  gap: 15px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  font-weight: bold;
+  margin-bottom: 5px;
+  color: #555;
+}
+
+.file-input, .text-input, .text-area, .select-input {
+  padding: 10px;
+  border: 2px solid #ddd;
+  border-radius: 5px;
+  font-size: 14px;
+}
+
+.text-area {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.upload-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.upload-progress {
+  margin-top: 10px;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 20px;
+  background: #ddd;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 5px;
+}
+
+.progress-fill {
+  height: 100%;
+  background: #007bff;
+  transition: width 0.3s ease;
+}
+
+.upload-message {
+  margin-top: 10px;
+  padding: 10px;
+  border-radius: 5px;
+  font-weight: bold;
+}
+
+.upload-message.success {
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.upload-message.error {
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
 }
 
 .search-section {
@@ -483,5 +843,58 @@ export default {
   .info-grid {
     grid-template-columns: 1fr;
   }
+}
+
+/* Verse Results Styles */
+.verse-results {
+  margin-top: 20px;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  border: 1px solid #dee2e6;
+}
+
+.verse-results h4 {
+  margin: 0 0 15px 0;
+  color: #333;
+  font-size: 18px;
+}
+
+.no-verses {
+  text-align: center;
+  color: #666;
+  font-style: italic;
+  padding: 20px;
+}
+
+.verses-list {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.verse-item {
+  margin-bottom: 15px;
+  padding: 12px;
+  background: white;
+  border-radius: 4px;
+  border-left: 4px solid #007bff;
+}
+
+.verse-reference {
+  margin-bottom: 8px;
+  font-weight: bold;
+  color: #007bff;
+}
+
+.verse-text {
+  line-height: 1.5;
+  color: #333;
+}
+
+.verse-text mark {
+  background-color: #fff3cd;
+  padding: 2px 4px;
+  border-radius: 2px;
+  font-weight: bold;
 }
 </style>

@@ -286,6 +286,26 @@ app.get('/api/bible/:version/:book/:chapter', async (req, res) => {
   }
 });
 
+// Verse of the Day API
+app.get('/api/verse-of-the-day', async (req, res) => {
+  try {
+    const { version = 'bsb' } = req.query;
+
+    // Return a static verse for testing
+    res.json({
+      verse: {
+        text: "For God so loved the world that he gave his one and only Son, that whoever believes in him shall not perish but have eternal life."
+      },
+      reference: "John 3:16",
+      version
+    });
+
+  } catch (error) {
+    console.error('Error getting verse of the day:', error);
+    res.status(500).json({ error: 'Failed to get verse of the day' });
+  }
+});
+
 // Word Studies API
 let wordStudies = [
   {
@@ -510,7 +530,7 @@ const server = app.listen(PORT, '127.0.0.1', () => {
   console.log('Server started successfully - ready to accept connections');
 }).on('error', (err) => {
   console.error('Server startup error:', err);
-  process.exit(1);
+  // Don't exit - let the server continue
 }).on('listening', () => {
   console.log('Server is now listening');
   console.log('Server should be accessible at http://localhost:' + PORT);

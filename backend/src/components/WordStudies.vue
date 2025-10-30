@@ -362,6 +362,11 @@ export default {
   padding: 20px;
 }
 
+.word-studies h1 {
+  color: #333;
+  margin-bottom: 20px;
+}
+
 .actions-bar {
   margin-bottom: 30px;
 }

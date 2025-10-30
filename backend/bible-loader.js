@@ -193,6 +193,64 @@ class BibleLoader {
     const embeddedData = await this.loadEmbeddedData();
     return embeddedData.versions;
   }
+
+  /**
+   * Search for Greek words in text files
+   * @param {string} query - The Greek word to search for
+   * @param {string} fileName - The text file to search (optional, defaults to bib.txt)
+   * @returns {Promise<Array>} Search results
+   */
+  async searchTextFile(query, fileName = 'bib.txt') {
+    const results = [];
+    const filePath = path.join(__dirname, fileName);
+
+    try {
+      if (!fs.existsSync(filePath)) {
+        throw new Error(`Text file '${fileName}' not found`);
+      }
+
+      const content = fs.readFileSync(filePath, 'utf-8');
+      const lines = content.split('\n');
+      const searchTerm = query.toLowerCase();
+
+      lines.forEach((line, lineIndex) => {
+        const lowerLine = line.toLowerCase();
+        if (lowerLine.includes(searchTerm)) {
+          // Try to extract book, chapter, verse info from context
+          let book = 'Unknown';
+          let chapter = 0;
+          let verse = 0;
+
+          // Look for book names in nearby lines
+          for (let i = Math.max(0, lineIndex - 5); i < Math.min(lines.length, lineIndex + 5); i++) {
+            const nearbyLine = lines[i].trim();
+            // Common book patterns
+            const bookMatch = nearbyLine.match(/^([1-3]?\s?[A-Za-z]+)\s+(\d+):(\d+)/);
+            if (bookMatch) {
+              book = bookMatch[1];
+              chapter = parseInt(bookMatch[2]);
+              verse = parseInt(bookMatch[3]);
+              break;
+            }
+          }
+
+          results.push({
+            book,
+            chapter,
+            verse,
+            text: line.trim(),
+            lineNumber: lineIndex + 1,
+            fileName
+          });
+        }
+      });
+
+      return results.slice(0, 50); // Limit results
+    } catch (error) {
+      console.error(`Error searching text file ${fileName}:`, error);
+      throw error;
+    }
+  }
 }
 
 module.exports = BibleLoader;

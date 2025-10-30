@@ -13,6 +13,7 @@
         <router-link to="/word-studies" class="nav-link">Word Studies</router-link>
         <router-link to="/study" class="nav-link">Study Tools</router-link>
         <router-link to="/resources" class="nav-link">Resources</router-link>
+        <router-link v-if="authStore.isAuthenticated" to="/profile" class="nav-link">Profile</router-link>
 
         <div v-if="authStore.isAuthenticated" class="nav-auth">
           <span class="user-info">Welcome, {{ authStore.user?.username }}</span>

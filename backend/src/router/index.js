@@ -8,6 +8,7 @@ import StudyTools from '../components/study/StudyTools.vue'
 import Lexicon from '../components/Lexicon.vue'
 import WordStudies from '../components/WordStudies.vue'
 import Resources from '../components/Resources.vue'
+import Profile from '../components/Profile.vue'
 
 const routes = [
   {
@@ -57,6 +58,12 @@ const routes = [
     path: '/resources',
     name: 'Resources',
     component: Resources,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/profile',
+    name: 'Profile',
+    component: Profile,
     meta: { requiresAuth: true }
   }
 ]

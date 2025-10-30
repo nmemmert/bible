@@ -548,6 +548,11 @@ const addHighlight = async () => {
 }
 
 const addStudyGuide = async () => {
+  if (!newStudyGuide.value.title.trim()) {
+    alert('Please enter a title for the study guide');
+    return;
+  }
+
   loading.value = true
   try {
     await api.post('/api/study-guides', newStudyGuide.value)
@@ -787,6 +792,10 @@ watch(showStudyGuides, (newVal) => {
 .study-tools {
   max-width: 1200px;
   margin: 0 auto;
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .study-tools h1 {

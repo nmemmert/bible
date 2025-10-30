@@ -1,5 +1,14 @@
 import axios from 'axios'
 
+// Configure axios to include auth headers
+axios.interceptors.request.use((config) => {
+  const token = localStorage.getItem('authToken')
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`
+  }
+  return config
+})
+
 // Load Bible data
 let bibleData = null;
 let bibleVersions = null;

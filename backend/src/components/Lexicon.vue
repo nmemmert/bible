@@ -119,15 +119,36 @@
           <div class="detail-row">
             <strong>Usage:</strong> {{ selectedEntry.usage }}
           </div>
-        </div>
 
-        <div class="modal-actions">
-          <button @click="searchInBible(selectedEntry)" class="btn-secondary">
-            View in Bible
-          </button>
-          <button @click="createWordStudy(selectedEntry)" class="btn-primary">
-            Create Word Study
-          </button>
+          <!-- Verses Section -->
+          <div class="verses-section">
+            <div class="verses-header">
+              <h3>Verses Containing This Word</h3>
+              <button @click="findVerses(selectedEntry)" :disabled="verseLoading" class="btn-secondary">
+                {{ verseLoading ? 'Searching...' : 'Find Verses' }}
+              </button>
+            </div>
+
+            <div v-if="verseResults.length > 0" class="verses-list">
+              <div
+                v-for="verse in verseResults.slice(0, 10)"
+                :key="`${verse.book}-${verse.chapter}-${verse.verse}`"
+                class="verse-item"
+              >
+                <div class="verse-reference">
+                  {{ verse.book }} {{ verse.chapter }}:{{ verse.verse }}
+                </div>
+                <div class="verse-text" v-html="highlightText(verse.text, selectedEntry.original_word)"></div>
+              </div>
+              <div v-if="verseResults.length > 10" class="more-results">
+                And {{ verseResults.length - 10 }} more verses...
+              </div>
+            </div>
+
+            <div v-else-if="verseSearchAttempted && !verseLoading" class="no-verses">
+              No verses found containing this word.
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -151,7 +172,10 @@ export default {
       totalEntries: 0,
       totalPages: 1,
       searchTimeout: null,
-      wordStudies: []
+      wordStudies: [],
+      verseResults: [],
+      verseLoading: false,
+      verseSearchAttempted: false
     }
   },
   computed: {
@@ -254,45 +278,8 @@ export default {
       // Show modal only - navigation is now optional via button in modal
     },
 
-    async searchInBible(entry) {
-      try {
-        // Try multiple search terms: transliteration, definition keywords, or common English words
-        let searchTerms = [];
-        
-        // Add transliteration if it exists
-        if (entry.transliteration) {
-          searchTerms.push(entry.transliteration);
-        }
-        
-        // Extract keywords from definition
-        if (entry.definition) {
-          const definitionWords = entry.definition.toLowerCase()
-            .split(/[,;.\s]+/)
-            .filter(word => word.length > 2)
-            .slice(0, 3); // Take first 3 meaningful words
-          searchTerms.push(...definitionWords);
-        }
-        
-        // Try searching with each term until we find results
-        for (const term of searchTerms) {
-          const response = await fetch(`/api/bible/search?q=${encodeURIComponent(term)}&version=kjv`);
-          const data = await response.json();
-          
-          if (data.results && data.results.length > 0) {
-            // Navigate to the first result with verse anchor
-            const firstResult = data.results[0];
-            this.$router.push(`/bible/kjv/${firstResult.book}/${firstResult.chapter}#verse-${firstResult.verse}`);
-            return; // Exit after finding results
-          }
-        }
-        
-        // If no results found with any term, go to Genesis 1
-        this.$router.push('/bible/kjv/Genesis/1');
-      } catch (error) {
-        console.error('Error searching Bible:', error);
-        // Navigate to default chapter on error
-        this.$router.push('/bible/kjv/Genesis/1');
-      }
+    closeModal() {
+      this.selectedEntry = null
     },
 
     async changePage(newPage) {
@@ -364,6 +351,49 @@ export default {
         console.error('Error creating word study:', error)
         // Could show an error message to user here
       }
+    },
+
+    async findVerses(entry) {
+      try {
+        this.verseLoading = true
+        this.verseSearchAttempted = false
+
+        // Check if the word contains Greek characters
+        const hasGreekChars = /[\u0370-\u03FF\u1F00-\u1FFF]/.test(entry.original_word)
+
+        let response
+        if (hasGreekChars) {
+          // Search Greek words in text files (bib.txt for interlinear Bible)
+          response = await fetch(`/api/bible/search-text?q=${encodeURIComponent(entry.original_word)}&file=bib.txt`)
+        } else {
+          // Search English words in KJV Bible
+          response = await fetch(`/api/bible/search?q=${encodeURIComponent(entry.original_word)}&version=kjv`)
+        }
+
+        if (!response.ok) {
+          throw new Error('Failed to search for verses')
+        }
+
+        const results = await response.json()
+        this.verseResults = results || []
+        this.verseSearchAttempted = true
+
+        console.log(`Found ${this.verseResults.length} verses for "${entry.original_word}"${hasGreekChars ? ' (Greek search)' : ' (KJV search)'}`)
+      } catch (error) {
+        console.error('Error finding verses:', error)
+        this.verseResults = []
+        this.verseSearchAttempted = true
+      } finally {
+        this.verseLoading = false
+      }
+    },
+
+    highlightText(text, searchTerm) {
+      if (!searchTerm) return text
+
+      // Simple case-insensitive highlighting
+      const regex = new RegExp(`(${searchTerm})`, 'gi')
+      return text.replace(regex, '<mark>$1</mark>')
     }
   }
 }
@@ -623,38 +653,111 @@ export default {
 .modal-actions {
   padding: 20px;
   border-top: 1px solid #ddd;
-  text-align: right;
+  display: flex;
+  gap: 10px;
+}
+
+.btn-primary, .btn-secondary {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s;
 }
 
 .btn-primary {
-  background: #007bff;
+  background-color: #007bff;
   color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 16px;
-  transition: background 0.2s ease;
 }
 
 .btn-primary:hover {
-  background: #0056b3;
+  background-color: #0056b3;
 }
 
 .btn-secondary {
-  background: #6c757d;
+  background-color: #6c757d;
   color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 16px;
-  transition: background 0.2s ease;
-  margin-right: 10px;
 }
 
 .btn-secondary:hover {
-  background: #545b62;
+  background-color: #545b62;
+}
+
+.btn-primary:disabled, .btn-secondary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.verses-section {
+  margin-top: 25px;
+  padding-top: 20px;
+  border-top: 1px solid #eee;
+}
+
+.verses-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.verses-header h3 {
+  margin: 0;
+  color: #333;
+  font-size: 18px;
+}
+
+.verses-list {
+  max-height: 300px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  background: #fafafa;
+}
+
+.verse-item {
+  padding: 12px;
+  border-bottom: 1px solid #eee;
+}
+
+.verse-item:last-child {
+  border-bottom: none;
+}
+
+.verse-reference {
+  font-weight: bold;
+  color: #007bff;
+  margin-bottom: 5px;
+  font-size: 14px;
+}
+
+.verse-text {
+  line-height: 1.4;
+  color: #333;
+}
+
+.verse-text mark {
+  background-color: #fff3cd;
+  padding: 2px 4px;
+  border-radius: 2px;
+}
+
+.more-results {
+  padding: 10px;
+  text-align: center;
+  color: #666;
+  font-style: italic;
+  background: #f8f9fa;
+}
+
+.no-verses {
+  padding: 20px;
+  text-align: center;
+  color: #666;
+  font-style: italic;
+  background: #f8f9fa;
+  border-radius: 5px;
 }
 
 .loading, .error, .no-results {
