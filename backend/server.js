@@ -142,10 +142,13 @@ app.get('/api/auth/me', requireAuth, (req, res) => {
 });
 
 // PDF Resources API
-app.get('/api/resources', requireAuth, (req, res) => {
+app.get('/api/resources', (req, res) => {
+  console.log('Resources API called');
   try {
     const resourcesPath = path.join(__dirname, '..', 'pdf_resources.json');
+    console.log('Reading resources from:', resourcesPath);
     const resources = JSON.parse(fs.readFileSync(resourcesPath, 'utf8'));
+    console.log('Loaded', resources.length, 'resources');
     
     // Add extracted text content to each resource
     const resourcesWithText = resources.map(resource => {
@@ -167,6 +170,7 @@ app.get('/api/resources', requireAuth, (req, res) => {
       };
     });
     
+    console.log('Returning resources with text');
     res.json(resourcesWithText);
   } catch (error) {
     console.error('Error reading resources:', error);
@@ -326,11 +330,12 @@ let wordStudies = [
   }
 ];
 
-app.get('/api/word-studies', requireAuth, (req, res) => {
+app.get('/api/word-studies', (req, res) => {
+  console.log('Word studies API called');
   res.json(wordStudies);
 });
 
-app.post('/api/word-studies', requireAuth, (req, res) => {
+app.post('/api/word-studies', (req, res) => {
   const newStudy = {
     id: wordStudies.length + 1,
     ...req.body,
@@ -341,7 +346,7 @@ app.post('/api/word-studies', requireAuth, (req, res) => {
   res.json(newStudy);
 });
 
-app.put('/api/word-studies/:id', requireAuth, (req, res) => {
+app.put('/api/word-studies/:id', (req, res) => {
   const id = parseInt(req.params.id);
   const studyIndex = wordStudies.findIndex(study => study.id === id);
   if (studyIndex === -1) {
@@ -355,7 +360,7 @@ app.put('/api/word-studies/:id', requireAuth, (req, res) => {
   res.json(wordStudies[studyIndex]);
 });
 
-app.delete('/api/word-studies/:id', requireAuth, (req, res) => {
+app.delete('/api/word-studies/:id', (req, res) => {
   const id = parseInt(req.params.id);
   const studyIndex = wordStudies.findIndex(study => study.id === id);
   if (studyIndex === -1) {
