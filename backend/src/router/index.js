@@ -39,7 +39,8 @@ const routes = [
   {
     path: '/study',
     name: 'StudyTools',
-    component: StudyTools
+    component: StudyTools,
+    meta: { requiresAuth: true }
   },
   {
     path: '/lexicon',
@@ -49,18 +50,36 @@ const routes = [
   {
     path: '/word-studies',
     name: 'WordStudies',
-    component: WordStudies
+    component: WordStudies,
+    meta: { requiresAuth: true }
   },
   {
     path: '/resources',
     name: 'Resources',
-    component: Resources
+    component: Resources,
+    meta: { requiresAuth: true }
   }
 ]
 
 const router = createRouter({
   history: createWebHistory(),
   routes
+})
+
+// Navigation guard for authentication
+router.beforeEach((to, from, next) => {
+  const isAuthenticated = !!localStorage.getItem('authToken')
+  const requiresAuth = to.matched.some(record => record.meta.requiresAuth)
+
+  if (requiresAuth && !isAuthenticated) {
+    // Redirect to login with return path
+    next({
+      path: '/login',
+      query: { redirect: to.fullPath }
+    })
+  } else {
+    next()
+  }
 })
 
 export default router

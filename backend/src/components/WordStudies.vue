@@ -196,10 +196,17 @@ export default {
     await this.loadWordStudies()
   },
   methods: {
+    getAuthHeaders() {
+      const token = localStorage.getItem('authToken')
+      return token ? { 'Authorization': `Bearer ${token}` } : {}
+    },
+
     async loadWordStudies() {
       try {
         this.loading = true
-        const response = await fetch('/api/word-studies')
+        const response = await fetch('/api/word-studies', {
+          headers: this.getAuthHeaders()
+        })
         if (!response.ok) {
           throw new Error('Failed to load word studies')
         }
@@ -218,7 +225,8 @@ export default {
         const response = await fetch('/api/word-studies', {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            ...this.getAuthHeaders()
           },
           body: JSON.stringify(this.newStudy)
         })
@@ -288,7 +296,8 @@ export default {
         const response = await fetch(`/api/word-studies/${this.selectedStudy.id}`, {
           method: 'PUT',
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            ...this.getAuthHeaders()
           },
           body: JSON.stringify({
             title: this.selectedStudy.title,
@@ -325,7 +334,8 @@ export default {
       try {
         this.deleting = true
         const response = await fetch(`/api/word-studies/${this.selectedStudy.id}`, {
-          method: 'DELETE'
+          method: 'DELETE',
+          headers: this.getAuthHeaders()
         })
 
         if (!response.ok) {

@@ -46,7 +46,10 @@
         >
           <div class="entry-header">
             <h3>{{ entry.strongs_number }}</h3>
-            <span class="language-tag" :class="entry.language">{{ entry.language }}</span>
+            <div class="entry-badges">
+              <span class="language-tag" :class="entry.language">{{ entry.language }}</span>
+              <span v-if="hasWordStudy(entry.strongs_number)" class="study-indicator">📖 Study</span>
+            </div>
           </div>
 
           <div class="entry-content">
@@ -67,20 +70,20 @@
       <!-- Pagination -->
       <div v-if="totalPages > 1" class="pagination">
         <button
-          @click="currentPage--"
-          :disabled="currentPage === 1"
+          @click="changePage(currentPage - 1)"
+          :disabled="currentPage === 1 || loading"
           class="page-btn"
         >
           Previous
         </button>
 
         <span class="page-info">
-          Page {{ currentPage }} of {{ totalPages }}
+          Page {{ currentPage }} of {{ totalPages }} ({{ totalEntries }} total entries)
         </span>
 
         <button
-          @click="currentPage++"
-          :disabled="currentPage === totalPages"
+          @click="changePage(currentPage + 1)"
+          :disabled="currentPage === totalPages || loading"
           class="page-btn"
         >
           Next
@@ -119,6 +122,9 @@
         </div>
 
         <div class="modal-actions">
+          <button @click="searchInBible(selectedEntry)" class="btn-secondary">
+            View in Bible
+          </button>
           <button @click="createWordStudy(selectedEntry)" class="btn-primary">
             Create Word Study
           </button>
@@ -142,37 +148,63 @@ export default {
       error: null,
       currentPage: 1,
       pageSize: 20,
-      searchTimeout: null
+      totalEntries: 0,
+      totalPages: 1,
+      searchTimeout: null,
+      wordStudies: []
     }
   },
   computed: {
-    totalPages() {
-      return Math.ceil(this.filteredEntries.length / this.pageSize)
-    },
     paginatedEntries() {
-      const start = (this.currentPage - 1) * this.pageSize
-      const end = start + this.pageSize
-      return this.filteredEntries.slice(start, end)
+      return this.filteredEntries
+    },
+    hasWordStudy() {
+      return (strongsNumber) => {
+        // Temporarily disable word study indicators until properly implemented
+        return false;
+        // return this.wordStudies.some(study => study.strongs_number === strongsNumber)
+      }
     }
   },
   async mounted() {
-    await this.loadLexicon()
+    await Promise.all([
+      this.loadLexicon(),
+      this.loadWordStudies()
+    ])
   },
   methods: {
     async loadLexicon() {
       try {
         this.loading = true
-        const response = await fetch('/api/lexicon')
+        const response = await fetch(`/api/lexicon?page=${this.currentPage}&limit=${this.pageSize}`)
         if (!response.ok) {
           throw new Error('Failed to load lexicon')
         }
-        this.entries = await response.json()
-        this.filteredEntries = [...this.entries]
+        const data = await response.json()
+        this.filteredEntries = data.entries || []
+        this.totalEntries = data.total || 0
+        this.totalPages = data.totalPages || 1
+        this.currentPage = data.page || 1
       } catch (error) {
         this.error = error.message
         console.error('Error loading lexicon:', error)
       } finally {
         this.loading = false
+      }
+    },
+
+    async loadWordStudies() {
+      try {
+        const response = await fetch('/api/word-studies')
+        if (!response.ok) {
+          throw new Error('Failed to load word studies')
+        }
+        const data = await response.json()
+        this.wordStudies = data.studies || []
+        console.log('Loaded word studies:', this.wordStudies.length)
+      } catch (error) {
+        console.error('Error loading word studies:', error)
+        // Don't set main error state for word studies failure
       }
     },
 
@@ -183,42 +215,155 @@ export default {
       }, 300)
     },
 
-    filterLexicon() {
-      let filtered = [...this.entries]
+    async filterLexicon() {
+      try {
+        this.loading = true
+        this.currentPage = 1 // Reset to first page when filtering
+        const params = new URLSearchParams({
+          page: this.currentPage,
+          limit: this.pageSize
+        })
 
-      // Language filter
-      if (this.languageFilter) {
-        filtered = filtered.filter(entry => entry.language === this.languageFilter)
+        if (this.searchQuery.trim()) {
+          params.append('search', this.searchQuery.trim())
+        }
+
+        if (this.languageFilter) {
+          params.append('language', this.languageFilter)
+        }
+
+        const response = await fetch(`/api/lexicon?${params}`)
+        if (!response.ok) {
+          throw new Error('Failed to search lexicon')
+        }
+        const data = await response.json()
+        this.filteredEntries = data.entries || []
+        this.totalEntries = data.total || 0
+        this.totalPages = data.totalPages || 1
+        this.currentPage = data.page || 1
+      } catch (error) {
+        this.error = error.message
+        console.error('Error filtering lexicon:', error)
+      } finally {
+        this.loading = false
       }
-
-      // Search filter
-      if (this.searchQuery.trim()) {
-        const query = this.searchQuery.toLowerCase()
-        filtered = filtered.filter(entry =>
-          entry.strongs_number.toLowerCase().includes(query) ||
-          entry.original_word.toLowerCase().includes(query) ||
-          entry.transliteration.toLowerCase().includes(query) ||
-          entry.definition.toLowerCase().includes(query) ||
-          entry.usage.toLowerCase().includes(query)
-        )
-      }
-
-      this.filteredEntries = filtered
-      this.currentPage = 1 // Reset to first page
     },
 
     selectEntry(entry) {
       this.selectedEntry = entry
+      // Show modal only - navigation is now optional via button in modal
     },
 
-    closeModal() {
-      this.selectedEntry = null
+    async searchInBible(entry) {
+      try {
+        // Try multiple search terms: transliteration, definition keywords, or common English words
+        let searchTerms = [];
+        
+        // Add transliteration if it exists
+        if (entry.transliteration) {
+          searchTerms.push(entry.transliteration);
+        }
+        
+        // Extract keywords from definition
+        if (entry.definition) {
+          const definitionWords = entry.definition.toLowerCase()
+            .split(/[,;.\s]+/)
+            .filter(word => word.length > 2)
+            .slice(0, 3); // Take first 3 meaningful words
+          searchTerms.push(...definitionWords);
+        }
+        
+        // Try searching with each term until we find results
+        for (const term of searchTerms) {
+          const response = await fetch(`/api/bible/search?q=${encodeURIComponent(term)}&version=kjv`);
+          const data = await response.json();
+          
+          if (data.results && data.results.length > 0) {
+            // Navigate to the first result with verse anchor
+            const firstResult = data.results[0];
+            this.$router.push(`/bible/kjv/${firstResult.book}/${firstResult.chapter}#verse-${firstResult.verse}`);
+            return; // Exit after finding results
+          }
+        }
+        
+        // If no results found with any term, go to Genesis 1
+        this.$router.push('/bible/kjv/Genesis/1');
+      } catch (error) {
+        console.error('Error searching Bible:', error);
+        // Navigate to default chapter on error
+        this.$router.push('/bible/kjv/Genesis/1');
+      }
     },
 
-    createWordStudy(entry) {
-      // Emit event to parent component or navigate to word study creation
-      this.$emit('create-word-study', entry)
-      this.closeModal()
+    async changePage(newPage) {
+      if (newPage < 1 || newPage > this.totalPages) return
+
+      try {
+        this.loading = true
+        this.currentPage = newPage
+        const params = new URLSearchParams({
+          page: this.currentPage,
+          limit: this.pageSize
+        })
+
+        if (this.searchQuery.trim()) {
+          params.append('search', this.searchQuery.trim())
+        }
+
+        if (this.languageFilter) {
+          params.append('language', this.languageFilter)
+        }
+
+        const response = await fetch(`/api/lexicon?${params}`)
+        if (!response.ok) {
+          throw new Error('Failed to load page')
+        }
+        const data = await response.json()
+        this.filteredEntries = data.entries || []
+        this.totalEntries = data.total || 0
+        this.totalPages = data.totalPages || 1
+        this.currentPage = data.page || 1
+      } catch (error) {
+        this.error = error.message
+        console.error('Error changing page:', error)
+      } finally {
+        this.loading = false
+      }
+    },
+
+    async createWordStudy(entry) {
+      try {
+        const response = await fetch('/api/word-studies', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            strongs_number: entry.strongs_number,
+            title: `Study of ${entry.original_word} (${entry.strongs_number})`,
+            notes: ''
+          })
+        })
+
+        if (!response.ok) {
+          throw new Error('Failed to create word study')
+        }
+
+        const result = await response.json()
+        console.log('Word study created:', result)
+
+        // Reload word studies to update indicators
+        await this.loadWordStudies()
+
+        // Close modal
+        this.closeModal()
+
+        // Optionally emit event for parent components
+        this.$emit('word-study-created', entry)
+      } catch (error) {
+        console.error('Error creating word study:', error)
+        // Could show an error message to user here
+      }
     }
   }
 }
@@ -282,7 +427,8 @@ export default {
   padding: 20px;
   cursor: pointer;
   transition: all 0.2s ease;
-  background: white;
+  background: #ffffff;
+  color: #2c3e50;
 }
 
 .lexicon-entry:hover {
@@ -300,6 +446,12 @@ export default {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 15px;
+}
+
+.entry-badges {
+  display: flex;
+  gap: 8px;
+  align-items: center;
 }
 
 .entry-header h3 {
@@ -326,24 +478,35 @@ export default {
   color: #7b1fa2;
 }
 
+.study-indicator {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: bold;
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
 .original-word {
   font-size: 24px;
   margin-bottom: 8px;
+  color: #1a252f;
 }
 
 .transliteration {
-  color: #666;
+  color: #5a6c7d !important;
   font-style: italic;
 }
 
 .pronunciation {
-  color: #888;
+  color: #7f8c9a !important;
   font-style: italic;
   margin-bottom: 8px;
 }
 
 .part-of-speech {
-  color: #666;
+  color: #5a6c7d !important;
   font-size: 14px;
   margin-bottom: 12px;
   text-transform: capitalize;
@@ -351,7 +514,7 @@ export default {
 
 .definition {
   line-height: 1.5;
-  color: #333;
+  color: #34495e !important;
 }
 
 .pagination {
@@ -448,6 +611,7 @@ export default {
 .detail-row {
   margin-bottom: 15px;
   line-height: 1.5;
+  color: #333;
 }
 
 .detail-row strong {
@@ -475,6 +639,22 @@ export default {
 
 .btn-primary:hover {
   background: #0056b3;
+}
+
+.btn-secondary {
+  background: #6c757d;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background 0.2s ease;
+  margin-right: 10px;
+}
+
+.btn-secondary:hover {
+  background: #545b62;
 }
 
 .loading, .error, .no-results {

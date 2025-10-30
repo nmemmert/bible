@@ -5,9 +5,9 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "nodemon server.js",
+    "dev": "run-p dev:api dev:frontend",
+    "dev:api": "node server.js",
     "dev:frontend": "vite",
-    "dev:all": "run-p dev dev:frontend",
     "build:frontend": "vite build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

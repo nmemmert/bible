@@ -1,50 +1,33 @@
-# Start Bible Study Hub - Frontend and Backend
+# Start Bible Study Hub - Backend (serves frontend statically)
 Write-Host "Starting Bible Study Hub..." -ForegroundColor Green
 
-# Start backend in background
-$backendJob = Start-Job -ScriptBlock {
-    Set-Location "backend"
-    npm run dev
-}
+# Start backend in background (serves both API and static frontend)
+$backendProcess = Start-Process -FilePath "node" -ArgumentList "server.js" -WorkingDirectory "backend" -NoNewWindow -PassThru
 
-# Start frontend in background
-$frontendJob = Start-Job -ScriptBlock {
-    Set-Location "backend"
-    npm run dev:frontend
-}
-
-Write-Host "Backend job ID: $($backendJob.Id)" -ForegroundColor Yellow
-Write-Host "Frontend job ID: $($frontendJob.Id)" -ForegroundColor Yellow
+Write-Host "Backend process ID: $($backendProcess.Id)" -ForegroundColor Yellow
 Write-Host ""
-Write-Host "Both services are starting up..." -ForegroundColor Green
-Write-Host "Frontend will be available at: http://localhost:5173" -ForegroundColor Cyan
-Write-Host "Backend API will be available at: http://localhost:12345" -ForegroundColor Cyan
+Write-Host "Service is starting up..." -ForegroundColor Green
+Write-Host "Application will be available at: http://localhost:8086" -ForegroundColor Cyan
 Write-Host ""
-Write-Host "Press Ctrl+C to stop both services" -ForegroundColor Yellow
+Write-Host "Press Ctrl+C to stop the service" -ForegroundColor Yellow
 
-# Wait for jobs to start up
+# Wait for job to start up
 Start-Sleep -Seconds 5
 
-# Check job status
-Write-Host "Backend job state: $($backendJob.State)" -ForegroundColor Yellow
-Write-Host "Frontend job state: $($frontendJob.State)" -ForegroundColor Yellow
-
-# Display any errors
-if ($backendJob.State -eq "Failed") {
-    Write-Host "Backend job failed:" -ForegroundColor Red
-    Receive-Job -Job $backendJob
-}
-if ($frontendJob.State -eq "Failed") {
-    Write-Host "Frontend job failed:" -ForegroundColor Red
-    Receive-Job -Job $frontendJob
+# Check process status
+if ($backendProcess.HasExited) {
+    Write-Host "Backend process has exited with code: $($backendProcess.ExitCode)" -ForegroundColor Red
+} else {
+    Write-Host "Backend process is running" -ForegroundColor Green
 }
 
 # Keep running until user stops
-Write-Host "Services are running. Press Ctrl+C to stop..." -ForegroundColor Green
+Write-Host "Service is running. Press Ctrl+C to stop..." -ForegroundColor Green
 try {
-    Wait-Job -Job $backendJob, $frontendJob | Out-Null
+    $backendProcess.WaitForExit()
 } finally {
-    Write-Host "Stopping services..." -ForegroundColor Red
-    Stop-Job -Job $backendJob, $frontendJob -ErrorAction SilentlyContinue
-    Remove-Job -Job $backendJob, $frontendJob -ErrorAction SilentlyContinue
+    Write-Host "Stopping service..." -ForegroundColor Red
+    if (!$backendProcess.HasExited) {
+        $backendProcess.Kill()
+    }
 }

@@ -3,7 +3,25 @@
     <h1>Study Resources</h1>
 
     <div class="resources-intro">
-      <p>Access additional Bible study materials and reference works. These resources are provided as downloadable PDFs for your study convenience.</p>
+      <p>Access additional Bible study materials and reference works. Search through the extracted text content of these resources.</p>
+    </div>
+
+    <!-- Search Section -->
+    <div class="search-section">
+      <div class="search-controls">
+        <input
+          v-model="searchQuery"
+          type="text"
+          placeholder="Search within resource content..."
+          class="search-input"
+        >
+        <select v-model="resourceFilter" class="filter-select">
+          <option value="">All Resources</option>
+          <option value="concordance">Concordance</option>
+          <option value="bible_text">Bible Text</option>
+          <option value="interlinear">Interlinear</option>
+        </select>
+      </div>
     </div>
 
     <!-- Loading State -->
@@ -24,7 +42,7 @@
 
       <div v-else class="resource-cards">
         <div
-          v-for="resource in resources"
+          v-for="resource in filteredResources"
           :key="resource.filename"
           class="resource-card"
         >
@@ -35,13 +53,13 @@
 
           <div class="resource-meta">
             <div class="meta-item">
-              <strong>File Size:</strong> {{ formatFileSize(resource.fileSize) }}
-            </div>
-            <div class="meta-item" v-if="resource.analysis && resource.analysis.pages > 0">
-              <strong>Pages:</strong> {{ resource.analysis.pages }}
+              <strong>Pages:</strong> {{ resource.pages || resource.analysis?.pages || 'N/A' }}
             </div>
             <div class="meta-item">
-              <strong>Added:</strong> {{ formatDate(resource.created_at) }}
+              <strong>Words:</strong> {{ resource.analysis?.totalWords || resource.totalWords || 'N/A' }}
+            </div>
+            <div class="meta-item">
+              <strong>Language:</strong> {{ resource.analysis?.language || resource.language || 'Unknown' }}
             </div>
           </div>
 
@@ -49,25 +67,21 @@
             <p>{{ resource.description }}</p>
           </div>
 
-          <!-- PDF Viewer Toggle -->
-          <div class="viewer-toggle">
+          <!-- Text Content Toggle -->
+          <div class="content-toggle">
             <button
-              @click="toggleViewer(resource)"
+              @click="toggleContent(resource)"
               class="btn-secondary"
             >
-              {{ isViewing(resource) ? '📖 Hide PDF Viewer' : '👁️ View PDF Online' }}
+              {{ isViewingContent(resource) ? '📖 Hide Text Content' : '� View Text Content' }}
             </button>
           </div>
 
-          <!-- PDF Viewer -->
-          <div v-if="isViewing(resource)" class="pdf-viewer">
-            <iframe
-              :src="resource.downloadUrl"
-              width="100%"
-              height="600px"
-              style="border: 1px solid #ddd; border-radius: 4px;"
-              title="PDF Viewer"
-            ></iframe>
+          <!-- Text Content Viewer -->
+          <div v-if="isViewingContent(resource)" class="text-viewer">
+            <div class="text-content">
+              <pre>{{ getDisplayText(resource) }}</pre>
+            </div>
           </div>
 
           <div class="resource-actions">
@@ -113,17 +127,49 @@ export default {
       resources: [],
       loading: true,
       error: null,
-      viewingResources: new Set() // Track which resources are being viewed
+      searchQuery: '',
+      resourceFilter: '',
+      viewingContent: new Set(), // Track which resources have content displayed
     }
   },
   async mounted() {
     await this.loadResources()
   },
+  computed: {
+    filteredResources() {
+      let filtered = [...this.resources]
+
+      // Filter by resource type
+      if (this.resourceFilter) {
+        filtered = filtered.filter(resource => resource.type === this.resourceFilter)
+      }
+
+      // Filter by search query
+      if (this.searchQuery.trim()) {
+        const query = this.searchQuery.toLowerCase()
+        filtered = filtered.filter(resource => {
+          const text = resource.extractedText || resource.content || ''
+          return text.toLowerCase().includes(query) ||
+                 resource.title.toLowerCase().includes(query) ||
+                 resource.description.toLowerCase().includes(query)
+        })
+      }
+
+      return filtered
+    }
+  },
   methods: {
+    getAuthHeaders() {
+      const token = localStorage.getItem('authToken')
+      return token ? { 'Authorization': `Bearer ${token}` } : {}
+    },
+
     async loadResources() {
       try {
         this.loading = true
-        const response = await fetch('/api/resources')
+        const response = await fetch('/api/resources', {
+          headers: this.getAuthHeaders()
+        })
         if (!response.ok) {
           throw new Error('Failed to load resources')
         }
@@ -153,17 +199,25 @@ export default {
       console.log(`Downloading: ${resource.title}`)
     },
 
-    toggleViewer(resource) {
+    toggleContent(resource) {
       const filename = resource.filename
-      if (this.viewingResources.has(filename)) {
-        this.viewingResources.delete(filename)
+      if (this.viewingContent.has(filename)) {
+        this.viewingContent.delete(filename)
       } else {
-        this.viewingResources.add(filename)
+        this.viewingContent.add(filename)
       }
     },
 
-    isViewing(resource) {
-      return this.viewingResources.has(resource.filename)
+    isViewingContent(resource) {
+      return this.viewingContent.has(resource.filename)
+    },
+
+    getDisplayText(resource) {
+      const text = resource.extractedText || resource.content || 'No text content available'
+      // Decode HTML entities
+      const decodedText = text.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#39;/g, "'")
+      // Limit display to first 2000 characters to avoid overwhelming the UI
+      return decodedText.length > 2000 ? decodedText.substring(0, 2000) + '...' : decodedText
     }
   }
 }
@@ -182,6 +236,40 @@ export default {
   border-radius: 8px;
   margin-bottom: 30px;
   text-align: center;
+}
+
+.search-section {
+  margin-bottom: 30px;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.search-controls {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+.search-input {
+  flex: 1;
+  padding: 12px;
+  border: 2px solid #ddd;
+  border-radius: 6px;
+  font-size: 16px;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #007bff;
+}
+
+.filter-select {
+  padding: 12px;
+  border: 2px solid #ddd;
+  border-radius: 6px;
+  background: white;
+  min-width: 150px;
 }
 
 .resources-intro p {
@@ -310,15 +398,34 @@ export default {
   color: white;
 }
 
-.viewer-toggle {
+.content-toggle {
   margin: 15px 0;
 }
 
-.pdf-viewer {
+.text-viewer {
   margin: 20px 0;
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.text-content {
+  background: #f8f9fa;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 20px;
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+.text-content pre {
+  margin: 0;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  font-family: 'Courier New', monospace;
+  font-size: 14px;
+  line-height: 1.4;
+  color: #2c3e50;
 }
 
 .resource-info {

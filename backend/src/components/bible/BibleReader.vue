@@ -61,7 +61,14 @@
         >
           <div class="verse-content">
             <span class="verse-number">{{ verse.verse }}</span>
-            <span class="verse-text">{{ verse.text }}</span>
+            <span
+              class="verse-text"
+              :ref="`verse-text-${verse.verse}`"
+              @mouseup="handleTextSelection(bibleStore.currentBook, bibleStore.currentChapter, verse.verse)"
+              @contextmenu.prevent="showHighlightMenu(bibleStore.currentBook, bibleStore.currentChapter, verse.verse, $event)"
+            >
+              {{ verse.text }}
+            </span>
           </div>
           <div class="verse-actions">
             <button
@@ -93,6 +100,26 @@
     <div v-else class="error">
       Failed to load chapter. Please try again.
     </div>
+
+    <!-- Highlight Menu -->
+    <div
+      v-if="highlightMenu.visible"
+      class="highlight-menu"
+      :style="{ left: highlightMenu.x + 'px', top: highlightMenu.y + 'px' }"
+    >
+      <div class="highlight-colors">
+        <button
+          v-for="color in highlightColors"
+          :key="color.name"
+          @click="applyHighlight(color.name)"
+          :class="`highlight-color ${color.name}`"
+          :title="color.label"
+        >
+          {{ color.emoji }}
+        </button>
+      </div>
+      <button @click="hideHighlightMenu" class="cancel-btn">Cancel</button>
+    </div>
   </div>
 </template>
 
@@ -101,9 +128,37 @@ import { ref, onMounted, computed, watch } from 'vue'
 import { useBibleStore } from '/src/stores/index.js'
 import api from '/src/api/index.js'
 
+const props = defineProps({
+  version: String,
+  book: String,
+  chapter: String
+})
+
 const bibleStore = useBibleStore()
 
 const loading = ref(true)
+
+// Highlight menu state
+const highlightMenu = ref({
+  visible: false,
+  x: 0,
+  y: 0,
+  book: '',
+  chapter: 0,
+  verse: 0,
+  selectedText: '',
+  startOffset: 0,
+  endOffset: 0
+})
+
+const highlightColors = [
+  { name: 'yellow', label: 'Yellow', emoji: '🟡' },
+  { name: 'green', label: 'Green', emoji: '🟢' },
+  { name: 'blue', label: 'Blue', emoji: '🔵' },
+  { name: 'pink', label: 'Pink', emoji: '🩷' },
+  { name: 'orange', label: 'Orange', emoji: '🟠' }
+]
+
 const books = [
   'Genesis', 'Exodus', 'Leviticus', 'Numbers', 'Deuteronomy',
   'Joshua', 'Judges', 'Ruth', '1 Samuel', '2 Samuel',
@@ -230,17 +285,155 @@ const addHighlight = async (book, chapter, verse) => {
   }
 }
 
+const handleTextSelection = (book, chapter, verse) => {
+  const selection = window.getSelection()
+  const selectedText = selection.toString().trim()
+
+  if (selectedText.length > 0) {
+    const range = selection.getRangeAt(0)
+    const verseElement = range.commonAncestorContainer.parentElement?.closest('.verse-text') ||
+                        range.commonAncestorContainer?.closest('.verse-text')
+
+    if (verseElement) {
+      const verseText = verseElement.textContent
+      const startOffset = verseText.indexOf(selectedText)
+      const endOffset = startOffset + selectedText.length
+
+      if (startOffset !== -1) {
+        highlightMenu.value = {
+          visible: true,
+          x: range.getBoundingClientRect().left + window.scrollX,
+          y: range.getBoundingClientRect().bottom + window.scrollY + 5,
+          book,
+          chapter,
+          verse,
+          selectedText,
+          startOffset,
+          endOffset
+        }
+      }
+    }
+  }
+}
+
+const showHighlightMenu = (book, chapter, verse, event) => {
+  // Right-click context menu for existing highlights
+  event.preventDefault()
+  // For now, just hide any existing menu
+  hideHighlightMenu()
+}
+
+const applyHighlight = async (color) => {
+  try {
+    await api.post('/api/highlights', {
+      book: highlightMenu.value.book,
+      chapter: highlightMenu.value.chapter,
+      verse: highlightMenu.value.verse,
+      color,
+      text: highlightMenu.value.selectedText,
+      startOffset: highlightMenu.value.startOffset,
+      endOffset: highlightMenu.value.endOffset
+    })
+
+    hideHighlightMenu()
+    alert('Text highlighted successfully!')
+  } catch (error) {
+    console.error('Failed to add highlight:', error)
+    alert('Failed to add highlight. Please try again.')
+  }
+}
+
+const hideHighlightMenu = () => {
+  highlightMenu.value.visible = false
+}
+
 onMounted(async () => {
   await loadVersions()
-  if (!bibleStore.currentBook) {
+  
+  // Set initial values from route props
+  if (props.version) {
+    bibleStore.setVersion(props.version)
+  } else if (!bibleStore.currentVersion) {
+    bibleStore.setVersion('kjv')
+  }
+  
+  if (props.book) {
+    bibleStore.setBook(props.book)
+  } else if (!bibleStore.currentBook) {
     bibleStore.setBook('Genesis')
   }
+  
+  if (props.chapter) {
+    bibleStore.setChapter(parseInt(props.chapter))
+  } else if (!bibleStore.currentChapter) {
+    bibleStore.setChapter(1)
+  }
+  
   await loadChapter()
+  
+  // Scroll to verse if hash is present in URL
+  const hash = window.location.hash
+  if (hash && hash.startsWith('#verse-')) {
+    const verseNum = hash.replace('#verse-', '')
+    setTimeout(() => {
+      const verseElement = document.getElementById(`verse-${verseNum}`)
+      if (verseElement) {
+        verseElement.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        // Add temporary highlight
+        verseElement.style.backgroundColor = '#fff3cd'
+        verseElement.style.borderLeft = '4px solid #ffc107'
+        setTimeout(() => {
+          verseElement.style.backgroundColor = ''
+          verseElement.style.borderLeft = ''
+        }, 3000)
+      }
+    }, 500) // Wait for DOM to render
+  }
 })
 
 watch(() => bibleStore.currentVersion, loadChapter)
 watch(() => bibleStore.currentBook, loadChapter)
-watch(() => bibleStore.currentChapter, loadChapter)
+watch(() => bibleStore.currentChapter, async (newChapter) => {
+  await loadChapter()
+  
+  // Scroll to verse if hash is present in URL after chapter change
+  const hash = window.location.hash
+  if (hash && hash.startsWith('#verse-')) {
+    const verseNum = hash.replace('#verse-', '')
+    setTimeout(() => {
+      const verseElement = document.getElementById(`verse-${verseNum}`)
+      if (verseElement) {
+        verseElement.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        // Add temporary highlight
+        verseElement.style.backgroundColor = '#fff3cd'
+        verseElement.style.borderLeft = '4px solid #ffc107'
+        setTimeout(() => {
+          verseElement.style.backgroundColor = ''
+          verseElement.style.borderLeft = ''
+        }, 3000)
+      }
+    }, 500)
+  }
+})
+
+// Watch for route parameter changes
+watch(() => props.version, (newVersion) => {
+  if (newVersion && newVersion !== bibleStore.currentVersion) {
+    bibleStore.setVersion(newVersion)
+  }
+})
+
+watch(() => props.book, (newBook) => {
+  if (newBook && newBook !== bibleStore.currentBook) {
+    bibleStore.setBook(newBook)
+  }
+})
+
+watch(() => props.chapter, (newChapter) => {
+  if (newChapter && parseInt(newChapter) !== bibleStore.currentChapter) {
+    bibleStore.setChapter(parseInt(newChapter))
+  }
+})
 </script>
 
 <style scoped>
@@ -352,6 +545,8 @@ watch(() => bibleStore.currentChapter, loadChapter)
 
 .verse-text {
   color: #2c3e50;
+  user-select: text;
+  cursor: text;
 }
 
 .verse-actions {
@@ -389,5 +584,77 @@ watch(() => bibleStore.currentChapter, loadChapter)
 
 .highlight-btn:hover {
   background: rgba(46, 204, 113, 0.2);
+}
+
+/* Highlight Menu Styles */
+.highlight-menu {
+  position: absolute;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  padding: 0.5rem;
+  z-index: 1000;
+  min-width: 200px;
+}
+
+.highlight-colors {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.highlight-color {
+  width: 30px;
+  height: 30px;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 1.2rem;
+  transition: transform 0.2s;
+}
+
+.highlight-color:hover {
+  transform: scale(1.1);
+}
+
+.highlight-color.yellow {
+  background: #fff3cd;
+  border: 2px solid #ffc107;
+}
+
+.highlight-color.green {
+  background: #d4edda;
+  border: 2px solid #28a745;
+}
+
+.highlight-color.blue {
+  background: #cce7ff;
+  border: 2px solid #007bff;
+}
+
+.highlight-color.pink {
+  background: #f8d7da;
+  border: 2px solid #dc3545;
+}
+
+.highlight-color.orange {
+  background: #ffeaa7;
+  border: 2px solid #fd7e14;
+}
+
+.cancel-btn {
+  background: #6c757d;
+  color: white;
+  border: none;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  width: 100%;
+}
+
+.cancel-btn:hover {
+  background: #5a6268;
 }
 </style>

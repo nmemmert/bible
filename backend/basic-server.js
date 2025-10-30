@@ -1,6 +1,7 @@
 const express = require('express');
 const app = express();
 app.get('/test', (req, res) => res.json({ok: true}));
-const server = app.listen(8086, () => {
-  console.log('Test server running on 8086');
+app.listen(8086, () => {
+  console.log('Basic server running on 8086');
+  // Don't exit
 });
