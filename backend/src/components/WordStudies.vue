@@ -204,9 +204,7 @@ export default {
     async loadWordStudies() {
       try {
         this.loading = true
-        const response = await fetch('/api/word-studies', {
-          headers: this.getAuthHeaders()
-        })
+        const response = await fetch('/api/word-studies')
         if (!response.ok) {
           throw new Error('Failed to load word studies')
         }

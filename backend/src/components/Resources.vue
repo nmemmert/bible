@@ -302,9 +302,7 @@ export default {
     async loadResources() {
       try {
         this.loading = true
-        const response = await fetch('/api/resources', {
-          headers: this.getAuthHeaders()
-        })
+        const response = await fetch('/api/resources')
         if (!response.ok) {
           throw new Error('Failed to load resources')
         }
